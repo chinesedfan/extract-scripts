@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 import re
+import sys
 import mpq
 
 
@@ -32,13 +33,13 @@ EXTRACT = [
 MPQ_REGEX = re.compile(r"hs-(\d+)-(\d+)-Win-final.MPQ")
 
 
-def extract(mpq, build):
+def extract(mpq, build, extract_to):
 	for path in EXTRACT:
 		if path not in mpq:
 			print("Skipping %r (not found)" % (path))
 			continue
 		data = mpq.open(path).read()
-		extract_path = os.path.join("extracted", str(build), path)
+		extract_path = os.path.join(extract_to, str(build), path)
 		dirname = os.path.dirname(extract_path)
 		if not os.path.exists(dirname):
 			os.makedirs(dirname)
@@ -81,15 +82,15 @@ def get_build_chains(builds):
 	return chains
 
 
-def extract_plain(path):
+def extract_plain(path, extract_to):
 	build = re.search(r"(\d+)", path).groups()[0]
 	mpqname = os.path.join(path, "base-Win.MPQ")
 	print("Opening: %r" % (mpqname))
 	base = mpq.MPQFile(mpqname)
-	extract(base, build)
+	extract(base, build, extract_to)
 
 
-def extract_chain(path, chain):
+def extract_chain(path, chain, extract_to):
 	base_build = 0
 	mpqname = os.path.join(path, "base-Win.MPQ")
 	print("Opening: %r" % (mpqname))
@@ -98,11 +99,16 @@ def extract_chain(path, chain):
 		mpqname = "hs-%i-%i-Win-final.MPQ" % (base_build, build)
 		print("Opening: %r" % (mpqname))
 		base.patch(os.path.join(path, "Updates", mpqname))
-		extract(base, build)
+		extract(base, build, extract_to)
 		base_build = build
 
 
 def main():
+	if len(sys.argv) < 2:
+		print("Usage: %s [OUTDIR]" % (sys.argv[0]))
+		exit(1)
+
+	extract_to = sys.argv[1]
 	paths = (
 		"HSB/3140.direct",
 		"HSB/3645.direct",
@@ -113,11 +119,11 @@ def main():
 	for path in paths:
 		builds = get_builds(path)
 		if builds is None:
-			extract_plain(path)
+			extract_plain(path, extract_to)
 		else:
 			chains = get_build_chains(builds)
 			for chain in chains:
-				extract_chain(path, chain)
+				extract_chain(path, chain, extract_to)
 
 
 if __name__ == "__main__":

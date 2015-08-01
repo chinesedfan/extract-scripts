@@ -1,6 +1,7 @@
 #!/bin/bash
 
 BASEDIR="$(realpath $(dirname $0))"
+PROCESSED_DIR="$BASEDIR/build/processed"
 GITDIR="$BASEDIR/hs-data.git"
 
 git init "$GITDIR"
@@ -46,11 +47,10 @@ patches=(
 	["9554"]="2.8.0"
 )
 
-cd "$BASEDIR/out"
-for build in *; do
+for dir in "$PROCESSED_DIR"/*; do
+	build=$(basename "$dir")
 	patch="${patches[$build]}"
 	echo "Committing files for $build"
-	dir="$BASEDIR/out/$build"
 	rm -rf "$GITDIR/DBF"
 	cp -rf "$dir"/* "$GITDIR"
 	sed -i "s/Version: .*/Version: $patch.$build/" "$GITDIR/README.md"
