@@ -4,9 +4,9 @@ import re
 import mpq
 
 
-BASEPATH = "HSB/4944.direct"
 EXTRACT = [
 	"Hearthstone.exe",
+	"Data/cards.unity3d",
 	"Data/Win/cardxml0.unity3d",
 	"Hearthstone_Data/Managed/Assembly-CSharp.dll",
 	"Hearthstone_Data/Managed/Assembly-CSharp-firstpass.dll",
@@ -48,9 +48,13 @@ def extract(mpq, build):
 			f.write(data)
 
 
-def get_builds(path):
+def get_builds(basepath):
+	basepath = os.path.join(basepath, "Updates")
+	if not os.path.exists(basepath):
+		# No build chain
+		return None
 	builds = {}
-	for path in os.listdir(path):
+	for path in os.listdir(basepath):
 		sre = MPQ_REGEX.match(path)
 		if sre:
 			base, build = sre.groups()
@@ -77,24 +81,43 @@ def get_build_chains(builds):
 	return chains
 
 
-def extract_chain(chain):
+def extract_plain(path):
+	build = re.search(r"(\d+)", path).groups()[0]
+	mpqname = os.path.join(path, "base-Win.MPQ")
+	print("Opening: %r" % (mpqname))
+	base = mpq.MPQFile(mpqname)
+	extract(base, build)
+
+
+def extract_chain(path, chain):
 	base_build = 0
-	mpqname = os.path.join(BASEPATH, "base-Win.MPQ")
+	mpqname = os.path.join(path, "base-Win.MPQ")
 	print("Opening: %r" % (mpqname))
 	base = mpq.MPQFile(mpqname)
 	for build in chain:
 		mpqname = "hs-%i-%i-Win-final.MPQ" % (base_build, build)
 		print("Opening: %r" % (mpqname))
-		base.patch(os.path.join(BASEPATH, "Updates", mpqname))
+		base.patch(os.path.join(path, "Updates", mpqname))
 		extract(base, build)
 		base_build = build
 
 
 def main():
-	builds = get_builds(os.path.join(BASEPATH, "Updates"))
-	chains = get_build_chains(builds)
-	for chain in chains:
-		extract_chain(chain)
+	paths = (
+		"HSB/3140.direct",
+		"HSB/3645.direct",
+		"HSB/3749.direct",
+		"HSB/4243.direct",
+		"HSB/4944.direct",
+	)
+	for path in paths:
+		builds = get_builds(path)
+		if builds is None:
+			extract_plain(path)
+		else:
+			chains = get_build_chains(builds)
+			for chain in chains:
+				extract_chain(path, chain)
 
 
 if __name__ == "__main__":
