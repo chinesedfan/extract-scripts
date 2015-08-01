@@ -9,6 +9,58 @@ UNTRANSLATED_ENUMIDS = (
 	"342",  # ArtistName
 )
 
+TAGS = {
+	32: ("TriggerVisual", "Bool"),
+	45: ("Health", "Number"),
+	47: ("Atk", "Number"),
+	48: ("Cost", "Number"),
+	114: ("Elite", "Bool"),
+	183: ("CardSet", "CardSet"),
+	184: ("CardTextInHand", "LocString"),
+	185: ("CardName", "LocString"),
+	187: ("Durability", "Number"),
+	189: ("Windfury", "Bool"),
+	190: ("Taunt", "Bool"),
+	191: ("Stealth", "Bool"),
+	192: ("Spellpower", "Bool"),
+	194: ("Divine Shield", "Bool"),
+	197: ("Charge", "Bool"),
+	199: ("Class", "Class"),
+	200: ("Race", "Race"),
+	201: ("Faction", "Faction"),
+	203: ("Rarity", "Rarity"),
+	202: ("CardType", "CardType"),
+	208: ("Freeze", "Bool"),
+	212: ("Enrage", "Bool"),
+	215: ("Recall", "Number"),
+	217: ("Deathrattle", "Bool"),
+	218: ("Battlecry", "Bool"),
+	219: ("Secret", "Bool"),
+	220: ("Combo", "Bool"),
+	251: ("AttackVisualType", "AttackVisualType"),
+	252: ("CardTextInPlay", "LocString"),
+	268: ("DevState", "DevState"),
+	293: ("Morph", "Bool"),
+	321: ("Collectible", "Bool"),
+	325: ("TargetingArrowText", "LocString"),
+	330: ("EnchantmentBirthVisual", "EnchantmentVisualType"),
+	331: ("EnchantmentIdleVisual", "EnchantmentVisualType"),
+	335: ("InvisibleDeathrattle", "Bool"),
+	338: ("OneTurnEffect", "Bool"),
+	339: ("Silence", "Bool"),
+	342: ("ArtistName", "String"),
+	349: ("ImmuneToSpellpower", "Bool"),
+	350: ("AdjacentBuff", "Bool"),
+	351: ("FlavorText", "LocString"),
+	361: ("HealTarget", "Bool"),
+	362: ("Aura", "Bool"),
+	363: ("Poisonous", "Bool"),
+	364: ("HowToGetThisCard", "LocString"),
+	365: ("HowToGetThisGoldCard", "LocString"),
+	367: ("AIMustPlay", "Bool"),
+	370: ("AffectedBySpellPower", "Bool"),
+}
+
 
 def pretty_xml(xml):
 	ret = ElementTree.tostring(xml)
@@ -18,8 +70,13 @@ def pretty_xml(xml):
 
 def clean_entity(xml):
 	# Reorder entities and ensure they have names
-	# for tag in xml.findall("Tag"):
-	# 	pass
+
+	for tag in xml.findall("Tag"):
+		enumid = int(tag.attrib["enumID"])
+		if enumid in TAGS:
+			name, type = TAGS[enumid]
+			tag.attrib["name"] = name
+			tag.attrib["type"] = type
 
 	return xml
 
