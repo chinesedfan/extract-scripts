@@ -37,6 +37,7 @@ TAGS = {
 	218: ("Battlecry", "Bool"),
 	219: ("Secret", "Bool"),
 	220: ("Combo", "Bool"),
+	240: ("Cant Be Damaged", "Bool"),
 	251: ("AttackVisualType", "AttackVisualType"),
 	252: ("CardTextInPlay", "LocString"),
 	268: ("DevState", "DevState"),
@@ -59,6 +60,7 @@ TAGS = {
 	365: ("HowToGetThisGoldCard", "LocString"),
 	367: ("AIMustPlay", "Bool"),
 	370: ("AffectedBySpellPower", "Bool"),
+	388: ("SparePart", "Bool"),
 }
 
 
