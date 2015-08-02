@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BASEDIR="$(realpath $(dirname $0))"
+BASEDIR="$(readlink -f $(dirname $0))"
 PROCESSED_DIR="$BASEDIR/build/processed"
 GITDIR="$BASEDIR/hs-data.git"
 

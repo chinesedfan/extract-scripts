@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BASEDIR="$(realpath $(dirname $0))"
+BASEDIR="$(readlink -f $(dirname $0))"
 EXTRACTED_DIR="$BASEDIR/build/extracted"
 PROCESSED_DIR="$BASEDIR/build/processed"
 
