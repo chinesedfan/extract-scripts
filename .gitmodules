@@ -1,0 +1,3 @@
+[submodule "ILSpy"]
+	path = decompiler/ILSpy
+	url = https://github.com/HearthSim/ILSpy.git
