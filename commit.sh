@@ -70,3 +70,25 @@ done
 
 git -C "$HSDATA_GIT" push --set-upstream -f origin master
 git -C "$HSDATA_GIT" push --tags -f
+
+
+HSCODE_GIT="$BASEDIR/hs-code.git"
+HSCODE_REMOTE="git@github.com:shadowhugs/hs-code.git"
+
+rm -rf "$HSCODE_GIT"
+git init "$HSCODE_GIT"
+git -C "$HSCODE_GIT" remote add origin "$HSCODE_REMOTE"
+git -C "$HSCODE_GIT" commit --allow-empty -m "Initial commit"
+
+for dir in "$DECOMPILED_DIR"/*; do
+	build=$(basename "$dir")
+	patch="${patches[$build]}"
+	echo "Comitting files for $build"
+	rm -rf "$HSCODE_GIT"/*
+	cp -rf "$dir"/* "$HSCODE_GIT"
+	git -C "$HSCODE_GIT" add "$HSCODE_GIT"/*
+	git -C "$HSCODE_GIT" commit -am "Update to patch $patch.$build"
+	git -C "$HSCODE_GIT" tag -am "Patch $patch.$build" $build
+done
+git -C "$HSCODE_GIT" push --set-upstream -f origin master
+git -C "$HSCODE_GIT" push --tags -f
