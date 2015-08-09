@@ -1,14 +1,12 @@
 #!/bin/bash
-
 BASEDIR="$(readlink -f $(dirname $0))"
 PROCESSED_DIR="$BASEDIR/build/processed"
-GITDIR="$BASEDIR/hs-data.git"
+DECOMPILED_DIR="$BASEDIR/build/decompiled"
 
-git init "$GITDIR"
-cp "$BASEDIR/README-hs-data.md" "$GITDIR/README.md"
-git -C "$GITDIR" remote add origin git@github.com:HearthSim/hs-data.git
-git -C "$GITDIR" add README.md
-git -C "$GITDIR" commit -m "Initial commit"
+export GIT_AUTHOR_NAME="HearthSim Bot"
+export GIT_AUTHOR_EMAIL="commits@hearthsim.info"
+export GIT_COMMITTER_NAME="$GIT_AUTHOR_NAME"
+export GIT_COMMITTER_EMAIL="$GIT_AUTHOR_EMAIL"
 
 patches=(
 	["3140"]="1.0.0"
@@ -47,18 +45,28 @@ patches=(
 	["9554"]="2.8.0"
 )
 
+
+HSDATA_GIT="$BASEDIR/hs-data.git"
+HSDATA_REMOTE="git@github.com:HearthSim/hs-data.git"
+
+git init "$HSDATA_GIT"
+cp "$BASEDIR/README-hs-data.md" "$HSDATA_GIT/README.md"
+git -C "$HSDATA_GIT" remote add origin "$HSDATA_REMOTE"
+git -C "$HSDATA_GIT" add README.md
+git -C "$HSDATA_GIT" commit -m "Initial commit"
+
 for dir in "$PROCESSED_DIR"/*; do
 	build=$(basename "$dir")
 	patch="${patches[$build]}"
 	echo "Committing files for $build"
-	rm -rf "$GITDIR/DBF"
-	cp -rf "$dir"/* "$GITDIR"
-	sed -i "s/Version: .*/Version: $patch.$build/" "$GITDIR/README.md"
-	git -C "$GITDIR" add "$GITDIR/DBF"
-	git -C "$GITDIR" add "$GITDIR/CardDefs.xml"
-	git -C "$GITDIR" commit -am "Update to patch $patch.$build"
-	git -C "$GITDIR" tag -am "Patch $patch.$build" $build
+	rm -rf "$HSDATA_GIT/DBF"
+	cp -rf "$dir"/* "$HSDATA_GIT"
+	sed -i "s/Version: .*/Version: $patch.$build/" "$HSDATA_GIT/README.md"
+	git -C "$HSDATA_GIT" add "$HSDATA_GIT/DBF"
+	git -C "$HSDATA_GIT" add "$HSDATA_GIT/CardDefs.xml"
+	git -C "$HSDATA_GIT" commit -am "Update to patch $patch.$build"
+	git -C "$HSDATA_GIT" tag -am "Patch $patch.$build" $build
 done
 
-git -C "$GITDIR" push --set-upstream -f origin master
-git -C "$GITDIR" push --tags -f
+git -C "$HSDATA_GIT" push --set-upstream -f origin master
+git -C "$HSDATA_GIT" push --tags -f
