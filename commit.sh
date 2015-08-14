@@ -90,5 +90,6 @@ for dir in "$DECOMPILED_DIR"/*; do
 	git -C "$HSCODE_GIT" commit -am "Update to patch $patch.$build"
 	git -C "$HSCODE_GIT" tag -am "Patch $patch.$build" $build
 done
+
 git -C "$HSCODE_GIT" push --set-upstream -f origin master
 git -C "$HSCODE_GIT" push --tags -f

@@ -27,9 +27,13 @@ process:
 
 decompile:
 	@cd $(BASE_DIR)/decompiler && $(MAKE)
-	$(MAKE) -f $(MAKEFILE) -B $(shell find $(EXTRACTED_DIR) -name Assembly-CSharp.dll -type f)
+	$(MAKE) -f $(MAKEFILE) -B $(shell find $(EXTRACTED_DIR) -name "Assembly-CSharp*.dll" -type f)
 
 %/Assembly-CSharp.dll:
+	$(eval buildnum := $(notdir $(realpath $(dir $@)/../..)))
+	$(DECOMPILER_BIN) $@ $(DECOMPILED_DIR)/$(buildnum)
+
+%/Assembly-CSharp-firstpass.dll:
 	$(eval buildnum := $(notdir $(realpath $(dir $@)/../..)))
 	$(DECOMPILER_BIN) $@ $(DECOMPILED_DIR)/$(buildnum)
 
@@ -39,9 +43,9 @@ clean:
 $(PROCESSED_DIR)/%/: $(EXTRACTED_DIR)/%/
 
 $(EXTRACTED_DIR)/%/:
-	$(eval buildnum := $(notdir $@))
+	$(eval buildnum := $(notdir $(patsubst %/,%,$@)))
 	$(eval outdir := $(PROCESSED_DIR)/$(buildnum))
 	$(eval TextAsset := $(shell find $@ -name TextAsset -type d))
-	@mkdir -p $(outdir)
-	@$(PROCESS_CARDXML_BIN) $(TextAsset) $(outdir)/CardDefs.xml
-	@test -d $@/DBF && cp -rf $@/DBF $(outdir) || exit 0
+	mkdir -p $(outdir)
+	$(PROCESS_CARDXML_BIN) $(TextAsset) $(outdir)/CardDefs.xml
+	test -d $@/DBF && cp -rf $@/DBF $(outdir) || exit 0
