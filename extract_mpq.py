@@ -82,15 +82,17 @@ def get_build_chains(builds):
 	return chains
 
 
-def extract_plain(path, extract_to):
+def extract_plain(path, extract_to, only=[]):
 	build = re.search(r"(\d+)", path).groups()[0]
 	mpqname = os.path.join(path, "base-Win.MPQ")
 	print("Opening: %r" % (mpqname))
 	base = mpq.MPQFile(mpqname)
+	if only and build not in only:
+		return
 	extract(base, build, extract_to)
 
 
-def extract_chain(path, chain, extract_to):
+def extract_chain(path, chain, extract_to, only=[]):
 	base_build = 0
 	mpqname = os.path.join(path, "base-Win.MPQ")
 	print("Opening: %r" % (mpqname))
@@ -99,8 +101,10 @@ def extract_chain(path, chain, extract_to):
 		mpqname = "hs-%i-%i-Win-final.MPQ" % (base_build, build)
 		print("Opening: %r" % (mpqname))
 		base.patch(os.path.join(path, "Updates", mpqname))
-		extract(base, build, extract_to)
 		base_build = build
+		if only and build not in only:
+			continue
+		extract(base, build, extract_to)
 
 
 def main():
@@ -116,14 +120,17 @@ def main():
 		"HSB/4243.direct",
 		"HSB/4944.direct",
 	)
+
+	filter_builds = [int(x) for x in sys.argv[2:]]
+
 	for path in paths:
 		builds = get_builds(path)
 		if builds is None:
-			extract_plain(path, extract_to)
+			extract_plain(path, extract_to, only=filter_builds)
 		else:
 			chains = get_build_chains(builds)
 			for chain in chains:
-				extract_chain(path, chain, extract_to)
+				extract_chain(path, chain, extract_to, only=filter_builds)
 
 
 if __name__ == "__main__":
