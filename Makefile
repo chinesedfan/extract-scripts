@@ -1,3 +1,4 @@
+SHELL:=/bin/bash -O globstar
 MAKEFILE := $(lastword $(MAKEFILE_LIST))
 BASE_DIR := $(realpath $(dir $(MAKEFILE)))
 BUILD_DIR := $(BASE_DIR)/build
@@ -17,7 +18,7 @@ all: extract process decompile
 
 extract:
 	$(EXTRACT_MPQ_BIN) $(EXTRACTED_DIR)
-	$(DISUNITY_BIN) --recursive extract $(EXTRACTED_DIR)
+	$(DISUNITY_BIN) --recursive extract $(EXTRACTED_DIR)/**/*.unity3d
 
 process:
 	mkdir -p $(PROCESSED_DIR)
