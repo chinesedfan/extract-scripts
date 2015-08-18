@@ -63,7 +63,7 @@ for dir in "$PROCESSED_DIR"/*; do
 	rm -rf "$HSDATA_GIT/DBF"
 	cp -rf "$dir"/* "$HSDATA_GIT"
 	sed -i "s/Version: .*/Version: $patch.$build/" "$HSDATA_GIT/README.md"
-	git -C "$HSDATA_GIT" add "$HSDATA_GIT/DBF"
+	test -d "$HSDATA_GIT" && git -C "$HSDATA_GIT" add "$HSDATA_GIT/DBF"
 	git -C "$HSDATA_GIT" add "$HSDATA_GIT/CardDefs.xml"
 	git -C "$HSDATA_GIT" commit -am "Update to patch $patch.$build"
 	git -C "$HSDATA_GIT" tag -am "Patch $patch.$build" $build
