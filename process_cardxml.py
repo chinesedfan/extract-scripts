@@ -9,6 +9,8 @@ UNTRANSLATED_ENUMIDS = (
 	"342",  # ArtistName
 )
 
+IGNORE_LOCALES = ("enGB", "ptPT")
+
 TAGS = {
 	32: ("TriggerVisual", "Bool"),
 	45: ("Health", "Int"),
@@ -160,7 +162,7 @@ def merge_locale_files(path):
 
 	for filename in files:
 		locale = os.path.splitext(filename)[0]
-		if locale == "enGB":
+		if locale in IGNORE_LOCALES:
 			continue
 		with open(os.path.join(path, filename), "r") as f:
 			xml = ElementTree.parse(f)
