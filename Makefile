@@ -21,7 +21,7 @@ extract:
 	$(DISUNITY_BIN) --recursive extract $(EXTRACTED_DIR)/**/*.unity3d
 
 process:
-	mkdir -p $(PROCESSED_DIR)
+	@mkdir -p $(PROCESSED_DIR)
 	@for dir in $(EXTRACTED_DIR)/*; do \
 		$(MAKE) -f $(MAKEFILE) -B $(subst $(EXTRACTED_DIR),$(PROCESSED_DIR),$$dir)/; \
 	done
@@ -47,6 +47,6 @@ $(EXTRACTED_DIR)/%/:
 	$(eval buildnum := $(notdir $(patsubst %/,%,$@)))
 	$(eval outdir := $(PROCESSED_DIR)/$(buildnum))
 	$(eval TextAsset := $(shell find $@ -name TextAsset -type d))
-	mkdir -p $(outdir)
-	$(PROCESS_CARDXML_BIN) $(TextAsset) $(outdir)/CardDefs.xml
-	test -d $@/DBF && cp -rf $@/DBF $(outdir) || exit 0
+	@mkdir -p $(outdir)
+	@$(PROCESS_CARDXML_BIN) $(TextAsset) $(outdir)/CardDefs.xml
+	@test -d $@/DBF && cp -rf $@/DBF $(outdir) || exit 0
