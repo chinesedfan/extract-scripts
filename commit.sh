@@ -49,42 +49,43 @@ patches=(
 
 HSDATA_GIT="$BASEDIR/hs-data.git"
 HSDATA_REMOTE="git@github.com:HearthSim/hs-data.git"
+GIT=git -C "$HSDATA_GIT"
 
 git init "$HSDATA_GIT"
 cp "$BASEDIR/README-hs-data.md" "$HSDATA_GIT/README.md"
-git -C "$HSDATA_GIT" remote add origin "$HSDATA_REMOTE"
-git -C "$HSDATA_GIT" add README.md
-git -C "$HSDATA_GIT" commit -m "Initial commit"
+$GIT remote add origin "$HSDATA_REMOTE"
+$GIT add README.md
+$GIT commit -m "Initial commit"
 
 for dir in "$PROCESSED_DIR"/*; do
 	build=$(basename "$dir")
 	patch="${patches[$build]}"
-	echo "Committing files for $build"
+	echo "Committing data files for $build"
 	rm -rf "$HSDATA_GIT/DBF"
 	cp -rf "$dir"/* "$HSDATA_GIT"
 	sed -i "s/Version: .*/Version: $patch.$build/" "$HSDATA_GIT/README.md"
-	test -d "$HSDATA_GIT" && git -C "$HSDATA_GIT" add "$HSDATA_GIT/DBF"
-	git -C "$HSDATA_GIT" add "$HSDATA_GIT/CardDefs.xml"
-	git -C "$HSDATA_GIT" commit -am "Update to patch $patch.$build"
-	git -C "$HSDATA_GIT" tag -am "Patch $patch.$build" $build
+	test -d "$HSDATA_GIT" && $GIT add "$HSDATA_GIT/DBF"
+	$GIT add "$HSDATA_GIT/CardDefs.xml"
+	$GIT commit -am "Update to patch $patch.$build"
+	$GIT tag -am "Patch $patch.$build" $build
 done
 
-git -C "$HSDATA_GIT" push --set-upstream -f origin master
-git -C "$HSDATA_GIT" push --tags -f
+$GIT push --set-upstream --follow-tags -f origin master
 
 
 HSCODE_GIT="$BASEDIR/hs-code.git"
 HSCODE_REMOTE="git@github.com:shadowhugs/hs-code.git"
+GIT=git -C "$HSCODE_GIT"
 
 rm -rf "$HSCODE_GIT"
 git init "$HSCODE_GIT"
-git -C "$HSCODE_GIT" remote add origin "$HSCODE_REMOTE"
-git -C "$HSCODE_GIT" commit --allow-empty -m "Initial commit"
+$GIT remote add origin "$HSCODE_REMOTE"
+$GIT commit --allow-empty -m "Initial commit"
 
 for dir in "$DECOMPILED_DIR"/*; do
 	build=$(basename "$dir")
 	patch="${patches[$build]}"
-	echo "Comitting files for $build"
+	echo "Comitting decompiled files for $build"
 	rm -rf "$HSCODE_GIT"/*
 	cp -rf "$dir"/* "$HSCODE_GIT"
 	git -C "$HSCODE_GIT" add "$HSCODE_GIT"/*
@@ -92,5 +93,4 @@ for dir in "$DECOMPILED_DIR"/*; do
 	git -C "$HSCODE_GIT" tag -am "Patch $patch.$build" $build
 done
 
-git -C "$HSCODE_GIT" push --set-upstream -f origin master
-git -C "$HSCODE_GIT" push --tags -f
+$GIT push --set-upstream -f origin master
