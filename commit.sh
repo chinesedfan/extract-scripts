@@ -2,6 +2,7 @@
 BASEDIR="$(readlink -f $(dirname $0))"
 PROCESSED_DIR="$BASEDIR/build/processed"
 DECOMPILED_DIR="$BASEDIR/build/decompiled"
+PROTOS_DIR="$BASEDIR/build/protos"
 
 export GIT_AUTHOR_NAME="HearthSim Bot"
 export GIT_AUTHOR_EMAIL="commits@hearthsim.info"
@@ -94,3 +95,30 @@ for dir in "$DECOMPILED_DIR"/*; do
 done
 
 $GIT push --set-upstream -f origin master
+
+
+HSPROTO_GIT="$BASEDIR/hs-proto.git"
+HSPROTO_REMOTE="git@github.com:HearthSim/hs-proto.git"
+GIT="git -C $HSPROTO_GIT"
+
+git init "$HSPROTO_GIT"
+cp "$BASEDIR/README-hs-proto.md" "$HSPROTO_GIT/README.md"
+$GIT remote add origin "$HSPROTO_REMOTE"
+$GIT add README.md
+$GIT commit -m "Initial commit"
+
+for dir in "$PROTOS_DIR"/*; do
+	build=$(basename "$dir")
+	patch="${patches[$build]}"
+	echo "Committing proto files for $build"
+	rm -rf "$HSPROTO_GIT/bnet" "$HSPROTO_GIT/pegasus"
+	cp -rf "$dir"/* "$HSPROTO_GIT"
+	sed -i "s/Version: .*/Version: $patch.$build/" "$HSPROTO_GIT/README.md"
+	$GIT add "$HSPROTO_GIT/bnet" "$HSPROTO_GIT/pegasus"
+	$GIT commit -am "Update to patch $patch.$build"
+	$GIT tag -am "Patch $patch.$build" $build
+done
+
+$GIT push --set-upstream -f origin master
+$GIT push --tags -f
+exit

@@ -5,10 +5,13 @@ BUILD_DIR := $(BASE_DIR)/build
 DECOMPILED_DIR := $(BUILD_DIR)/decompiled
 EXTRACTED_DIR := $(BUILD_DIR)/extracted
 PROCESSED_DIR := $(BUILD_DIR)/processed
+PROTOS_DIR := $(BUILD_DIR)/protos
+PROTOS_GO_DIR := $(BUILD_DIR)/go-protos
 DECOMPILER_BIN := mono $(BASE_DIR)/decompiler/build/decompile.exe
 DISUNITY_BIN := disunity
 EXTRACT_MPQ_BIN := $(BASE_DIR)/extract_mpq.py
 PROCESS_CARDXML_BIN := $(BASE_DIR)/process_cardxml.py
+PROTO_EXTRACTOR_BIN := $(BASE_DIR)/../csharp-proto-extractor/bin/Debug/csharp-proto-extractor.exe
 
 .SUFFIXES:
 .PHONY: all extract process decompile clean
@@ -33,10 +36,12 @@ decompile:
 %/Assembly-CSharp.dll:
 	$(eval buildnum := $(notdir $(realpath $(dir $@)/../..)))
 	$(DECOMPILER_BIN) $@ $(DECOMPILED_DIR)/$(buildnum)
+	$(PROTO_EXTRACTOR_BIN) -o $(PROTOS_DIR)/$(buildnum) -g $(PROTOS_GO_DIR)/$(buildnum) $@
 
 %/Assembly-CSharp-firstpass.dll:
 	$(eval buildnum := $(notdir $(realpath $(dir $@)/../..)))
 	$(DECOMPILER_BIN) $@ $(DECOMPILED_DIR)/$(buildnum)
+	$(PROTO_EXTRACTOR_BIN) -o $(PROTOS_DIR)/$(buildnum) -g $(PROTOS_GO_DIR)/$(buildnum) $@
 
 clean:
 	test -d $(BUILD_DIR) && rm -rf $(BUILD_DIR)
