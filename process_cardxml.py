@@ -51,6 +51,7 @@ TAGS = {
 	335: ("InvisibleDeathrattle", "Bool"),
 	338: ("OneTurnEffect", "Bool"),
 	339: ("Silence", "Bool"),
+	340: ("Counter", "Bool"),
 	342: ("ArtistName", "String"),
 	349: ("ImmuneToSpellpower", "Bool"),
 	350: ("AdjacentBuff", "Bool"),
