@@ -50,7 +50,7 @@ patches=(
 
 HSDATA_GIT="$BASEDIR/hs-data.git"
 HSDATA_REMOTE="git@github.com:HearthSim/hs-data.git"
-GIT=git -C "$HSDATA_GIT"
+GIT="git -C $HSDATA_GIT"
 
 git init "$HSDATA_GIT"
 cp "$BASEDIR/README-hs-data.md" "$HSDATA_GIT/README.md"
@@ -76,7 +76,7 @@ $GIT push --set-upstream --follow-tags -f origin master
 
 HSCODE_GIT="$BASEDIR/hs-code.git"
 HSCODE_REMOTE="git@github.com:shadowhugs/hs-code.git"
-GIT=git -C "$HSCODE_GIT"
+GIT="git -C $HSCODE_GIT"
 
 rm -rf "$HSCODE_GIT"
 git init "$HSCODE_GIT"
@@ -95,6 +95,7 @@ for dir in "$DECOMPILED_DIR"/*; do
 done
 
 $GIT push --set-upstream -f origin master
+$GIT push --tags -f
 
 
 HSPROTO_GIT="$BASEDIR/hs-proto.git"
