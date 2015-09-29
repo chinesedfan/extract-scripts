@@ -59,9 +59,10 @@ $GIT remote add origin "$HSDATA_REMOTE"
 $GIT add README.md
 $GIT commit -m "Initial commit"
 
-for dir in "$PROCESSED_DIR"/*; do
-	build=$(basename "$dir")
+for build in "${!patches[@]}"; do
 	patch="${patches[$build]}"
+	dir="$PROCESSED_DIR/$build"
+	[[ -d "$dir" ]] || continue
 	echo "Committing data files for $build"
 	rm -rf "$HSDATA_GIT/DBF"
 	cp -rf "$dir"/* "$HSDATA_GIT"
@@ -84,9 +85,10 @@ git init "$HSCODE_GIT"
 $GIT remote add origin "$HSCODE_REMOTE"
 $GIT commit --allow-empty -m "Initial commit"
 
-for dir in "$DECOMPILED_DIR"/*; do
-	build=$(basename "$dir")
+for build in "${!patches[@]}"; do
 	patch="${patches[$build]}"
+	dir="$DECOMPILED_DIR/$build"
+	[[ -d "$dir" ]] || continue
 	echo "Comitting decompiled files for $build"
 	rm -rf "$HSCODE_GIT"/*
 	cp -rf "$dir"/* "$HSCODE_GIT"
@@ -108,9 +110,10 @@ $GIT remote add origin "$HSPROTO_REMOTE"
 $GIT add README.md
 $GIT commit -m "Initial commit"
 
-for dir in "$PROTOS_DIR"/*; do
-	build=$(basename "$dir")
+for build in "${!patches[@]}"; do
 	patch="${patches[$build]}"
+	dir="$PROTOS_DIR/$build"
+	[[ -d "$dir" ]] || continue
 	echo "Committing proto files for $build"
 	rm -rf "$HSPROTO_GIT/bnet" "$HSPROTO_GIT/pegasus"
 	cp -rf "$dir"/* "$HSPROTO_GIT"
