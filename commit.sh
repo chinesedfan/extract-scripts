@@ -95,8 +95,7 @@ for dir in "$DECOMPILED_DIR"/*; do
 	git -C "$HSCODE_GIT" tag -am "Patch $patch.$build" $build
 done
 
-$GIT push --set-upstream -f origin master
-$GIT push --tags -f
+$GIT push --set-upstream --follow-tags -f origin master
 
 
 HSPROTO_GIT="$BASEDIR/hs-proto.git"
@@ -121,6 +120,4 @@ for dir in "$PROTOS_DIR"/*; do
 	$GIT tag -am "Patch $patch.$build" $build
 done
 
-$GIT push --set-upstream -f origin master
-$GIT push --tags -f
-exit
+$GIT push --set-upstream --follow-tags -f origin master
