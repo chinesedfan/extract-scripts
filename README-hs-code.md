@@ -1,7 +1,7 @@
-Hearthstone Protos
-==================
+Hearthstone Code
+================
 
-Protobufs decompiled from the [Hearthstone](http://playhearthstone.com)
+Code decompiled from the [Hearthstone](http://playhearthstone.com)
 game client. Source code for the decompiler available in
 [HearthSim/proto-extractor](https://github.com/hearthsim/proto-extractor).
 
