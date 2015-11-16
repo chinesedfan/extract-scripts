@@ -122,6 +122,20 @@ def merge_card_files(path):
 	print("Performing card merge on %r" % (path))
 	entities = {}
 
+	def _clean_tag(tag):
+		locale_elems = {e.tag: e for e in tag}
+		keys = sorted(locale_elems.keys())
+		for locale in IGNORE_LOCALES:
+			if locale in keys:
+				keys.pop(keys.index(locale))
+		# Sort enUS at the beginning
+		keys.insert(0, keys.pop(keys.index("enUS")))
+		tag[:] = [locale_elems[k] for k in keys]
+		tag.attrib["type"] = "LocString"
+		# unescape newlines
+		for t in tag:
+			t.text = t.text.replace("\\n", "\n")
+
 	for filename in os.listdir(path):
 		with open(os.path.join(path, filename), "r") as f:
 			xml = ElementTree.parse(f)
@@ -137,18 +151,12 @@ def merge_card_files(path):
 					for lt in tag:
 						tag.remove(lt)
 					continue
-				locale_elems = {e.tag: e for e in tag}
-				keys = sorted(locale_elems.keys())
-				for locale in IGNORE_LOCALES:
-					if locale in keys:
-						keys.pop(keys.index(locale))
-				# Sort enUS at the beginning
-				keys.insert(0, keys.pop(keys.index("enUS")))
-				tag[:] = [locale_elems[k] for k in keys]
-				tag.attrib["type"] = "LocString"
-				# unescape newlines
-				for t in tag:
-					t.text = t.text.replace("\\n", "\n")
+				_clean_tag(tag)
+
+			# Very old TriggeredPowerHistoryInfo tags were sometimes localized
+			tag = entity.find("TriggeredPowerHistoryInfo")
+			if tag is not None and len(tag):
+				_clean_tag(tag)
 
 	return make_carddefs(entities)
 
