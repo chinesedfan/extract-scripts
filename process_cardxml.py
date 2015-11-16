@@ -128,8 +128,10 @@ def merge_card_files(path):
 		for locale in IGNORE_LOCALES:
 			if locale in keys:
 				keys.pop(keys.index(locale))
-		# Sort enUS at the beginning
-		keys.insert(0, keys.pop(keys.index("enUS")))
+		if "enUS" in keys:
+			# When enUS was removed from TriggeredPowerHistoryInfo,
+			# the other locales weren't...
+			keys.insert(0, keys.pop(keys.index("enUS")))
 		tag[:] = [locale_elems[k] for k in keys]
 		tag.attrib["type"] = "LocString"
 		# unescape newlines
