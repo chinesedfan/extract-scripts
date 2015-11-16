@@ -139,6 +139,9 @@ def merge_card_files(path):
 					continue
 				locale_elems = {e.tag: e for e in tag}
 				keys = sorted(locale_elems.keys())
+				for locale in IGNORE_LOCALES:
+					if locale in keys:
+						keys.pop(keys.index(locale))
 				# Sort enUS at the beginning
 				keys.insert(0, keys.pop(keys.index("enUS")))
 				tag[:] = [locale_elems[k] for k in keys]
