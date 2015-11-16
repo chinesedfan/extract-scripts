@@ -86,6 +86,28 @@ def clean_entity(xml):
 	return xml
 
 
+def clean_entourage_ids(xml, dbf):
+	guids = {}
+
+	with open(dbf, "r") as f:
+		dbfxml = ElementTree.parse(f)
+		for record in dbfxml.findall("Record"):
+			long_guid = record.find("./Field[@column='LONG_GUID']")
+			if long_guid is None:
+				return
+			long_guid = long_guid.text
+			mini_guid = record.find("./Field[@column='NOTE_MINI_GUID']").text
+			guids[long_guid] = mini_guid
+
+	for entity in xml.findall("Entity"):
+		for entourage in entity.findall("EntourageCard"):
+			guid = entourage.attrib["cardID"]
+			if len(guid) < 34:
+				# Ignore mini-guids
+				continue
+			entourage.attrib["cardID"] = guids[guid]
+
+
 def make_carddefs(entities):
 	root = ElementTree.Element("CardDefs")
 	ids = sorted(entities.keys(), key=lambda i: i.lower())
@@ -181,7 +203,7 @@ def merge_locale_files(path):
 
 def main():
 	if len(sys.argv) < 3:
-		print("Usage: %s [indir] [outfile]" % sys.argv[0])
+		print("Usage: %s <indir> <outfile> [carddbf]" % sys.argv[0])
 		exit(1)
 
 	indir = sys.argv[1]
@@ -191,6 +213,9 @@ def main():
 		xml = merge_card_files(indir)
 	else:
 		xml = merge_locale_files(indir)
+
+	if len(sys.argv) == 4:
+		clean_entourage_ids(xml, sys.argv[3])
 
 	with open(outfile, "w") as f:
 		f.write(pretty_xml(xml))

@@ -52,6 +52,7 @@ $(EXTRACTED_DIR)/%/:
 	$(eval buildnum := $(notdir $(patsubst %/,%,$@)))
 	$(eval outdir := $(PROCESSED_DIR)/$(buildnum))
 	$(eval TextAsset := $(shell find $@ -name TextAsset -type d))
+	$(eval DBF := $(shell find $@ -name CARD.xml -type f))
 	@mkdir -p $(outdir)
-	@$(PROCESS_CARDXML_BIN) $(TextAsset) $(outdir)/CardDefs.xml
+	@$(PROCESS_CARDXML_BIN) $(TextAsset) $(outdir)/CardDefs.xml $(DBF)
 	@test -d $@/DBF && cp -rf $@/DBF $(outdir) || exit 0
