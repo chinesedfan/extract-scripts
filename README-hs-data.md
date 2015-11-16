@@ -7,3 +7,7 @@ DBF and CardXML files extracted from the
 Version: N/A
 
 http://hearthsim.info
+
+If you are looking for JSON-based data, you can use HearthstoneJSON instead:
+
+https://hearthstonejson.com
