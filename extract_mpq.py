@@ -54,7 +54,7 @@ def get_builds(basepath):
 	basepath = os.path.join(basepath, "Updates")
 	if not os.path.exists(basepath):
 		# No build chain
-		return None
+		return {}
 	builds = {}
 	for path in os.listdir(basepath):
 		sre = MPQ_REGEX.match(path)
@@ -126,7 +126,7 @@ def main():
 
 	for path in paths:
 		builds = get_builds(path)
-		if builds is None:
+		if not builds:
 			extract_plain(path, extract_to, only=filter_builds)
 		else:
 			chains = get_build_chains(builds)
