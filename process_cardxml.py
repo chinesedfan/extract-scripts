@@ -214,6 +214,10 @@ def merge_locale_files(path):
 	return make_carddefs(entities)
 
 
+def detect_build(path):
+	return int([x for x in path.split(os.path.sep) if x.isdigit()][0])
+
+
 def main():
 	if len(sys.argv) < 3:
 		print("Usage: %s <indir> <outfile> [carddbf]" % sys.argv[0])
@@ -229,6 +233,9 @@ def main():
 
 	if len(sys.argv) == 4:
 		clean_entourage_ids(xml, sys.argv[3])
+
+	build = detect_build(indir)
+	xml.attrib["build"] = str(build)
 
 	with open(outfile, "w") as f:
 		f.write(pretty_xml(xml))
