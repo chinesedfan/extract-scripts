@@ -21,7 +21,7 @@ all: extract process decompile
 
 extract:
 	$(EXTRACT_MPQ_BIN) $(EXTRACTED_DIR)
-	$(DISUNITY_BIN) --recursive extract $(EXTRACTED_DIR)/**/*.unity3d
+	$(DISUNITY_BIN) --include TextAsset --recursive extract $(EXTRACTED_DIR)/**/*.unity3d
 
 process:
 	@mkdir -p $(PROCESSED_DIR)
