@@ -102,6 +102,12 @@ function _commit() {
 	$GIT tag -am "Patch $patch.$BUILD" $BUILD
 }
 
+function _push() {
+	PROJECT=$1
+	REPO="$BASEDIR/$PROJECT.git"
+	git -C "$REPO" push --set-upstream --follow-tags -f origin master
+}
+
 function _update-hsdata() {
 	manifest="$BUILDDIR/extracted/$BUILD/manifest-cards.csv"
 	playerrors="$BUILDDIR/extracted/$BUILD/Data/PlayErrors.xml"
@@ -128,16 +134,12 @@ for BUILD in "${!patches[@]}"; do
 	_commit hsdata $BUILD
 done
 
-#$GIT push --set-upstream --follow-tags -f origin master
-
 
 _init-repo "hscode"
 
 for BUILD in "${!patches[@]}"; do
 	_commit hscode $BUILD
 done
-
-#$GIT push --set-upstream --follow-tags -f origin master
 
 
 _init-repo "hsproto"
@@ -146,4 +148,3 @@ for BUILD in "${!patches[@]}"; do
 	_commit hsproto $BUILD
 done
 
-#$GIT push --set-upstream --follow-tags -f origin master
