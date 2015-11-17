@@ -103,6 +103,10 @@ function _commit() {
 }
 
 function _update-hsdata() {
+	manifest="$BUILDDIR/extracted/$BUILD/manifest-cards.csv"
+	playerrors="$BUILDDIR/extracted/$BUILD/Data/PlayErrors.xml"
+	[[ -s "$manifest" ]] && cp "$manifest" "$REPO"
+	[[ -s "$playerrors" ]] && cp "$playerrors" "$REPO"
 	rm -rf "$REPO/DBF"
 	cp -rf "$dir"/* "$REPO"
 }

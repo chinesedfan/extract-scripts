@@ -7,6 +7,8 @@ import mpq
 
 EXTRACT = [
 	"Hearthstone.exe",
+	"manifest-cards.csv",
+	"Data/PlayErrors.xml",
 	"Data/cards.unity3d",
 	"Data/cardxml0.unity3d",
 	"Data/Win/cardxml0.unity3d",
