@@ -116,7 +116,7 @@ def main():
 	extract_to = sys.argv[1]
 	paths = (
 		"HSB/3140.direct",
-		"HSB/3645.direct",
+		"HSB/3388.direct",
 		"HSB/3749.direct",
 		"HSB/4243.direct",
 		"HSB/4944.direct",
