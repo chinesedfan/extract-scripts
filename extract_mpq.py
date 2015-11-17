@@ -8,6 +8,7 @@ import mpq
 EXTRACT = [
 	"Hearthstone.exe",
 	"Data/cards.unity3d",
+	"Data/cardxml0.unity3d",
 	"Data/Win/cardxml0.unity3d",
 	"Hearthstone_Data/Managed/Assembly-CSharp.dll",
 	"Hearthstone_Data/Managed/Assembly-CSharp-firstpass.dll",
