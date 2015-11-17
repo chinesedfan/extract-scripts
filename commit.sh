@@ -1,5 +1,6 @@
 #!/bin/bash
 BASEDIR="$(readlink -f $(dirname $0))"
+BUILDDIR="$BASEDIR/build"
 GH="git@github.com"
 
 export GIT_AUTHOR_NAME="HearthSim Bot"
@@ -52,9 +53,9 @@ patches=(
 )
 
 declare -A directories=(
-	["hscode"]="$BASEDIR/build/decompiled"
-	["hsdata"]="$BASEDIR/build/processed"
-	["hsproto"]="$BASEDIR/build/protos"
+	["hscode"]="$BUILDDIR/decompiled"
+	["hsdata"]="$BUILDDIR/processed"
+	["hsproto"]="$BUILDDIR/protos"
 )
 
 declare -A remotes=(
