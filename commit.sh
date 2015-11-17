@@ -97,8 +97,8 @@ function _commit() {
 	sed -i "s/Version: .*/Version: $patch.$BUILD/" "$REPO/README.md"
 	_update-$PROJECT
 
-	$GIT add "$REPO"
-	$GIT commit -am "Update to patch $patch.$BUILD"
+	$GIT add "$REPO" &>/dev/null
+	$GIT commit -am "Update to patch $patch.$BUILD" &>/dev/null
 	$GIT tag -am "Patch $patch.$BUILD" $BUILD
 }
 
@@ -129,6 +129,7 @@ for BUILD in "${!patches[@]}"; do
 done
 
 #$GIT push --set-upstream --follow-tags -f origin master
+
 
 _init-repo "hscode"
 
