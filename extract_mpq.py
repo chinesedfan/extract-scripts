@@ -37,7 +37,7 @@ MPQ_REGEX = re.compile(r"hs-(\d+)-(\d+)-Win-final.MPQ")
 def extract(mpq, build, extract_to):
 	for path in EXTRACT:
 		if path not in mpq:
-			print("Skipping %r (not found)" % (path))
+			# print("Skipping %r (not found)" % (path))
 			continue
 		data = mpq.open(path).read()
 		extract_path = os.path.join(extract_to, str(build), path)
