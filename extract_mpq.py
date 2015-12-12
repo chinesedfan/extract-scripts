@@ -3,6 +3,7 @@ import os
 import re
 import sys
 import mpq
+from hearthstone import enums
 
 
 EXTRACT = [
@@ -12,6 +13,7 @@ EXTRACT = [
 	"Data/cards.unity3d",
 	"Data/cardxml0.unity3d",
 	"Data/Win/cardxml0.unity3d",
+	"Hearthstone_Data/mainData",
 	"Hearthstone_Data/Managed/Assembly-CSharp.dll",
 	"Hearthstone_Data/Managed/Assembly-CSharp-firstpass.dll",
 	"DBF/ACHIEVE.xml",
@@ -31,16 +33,29 @@ EXTRACT = [
 	"DBF/SCENARIO.xml",
 	"DBF/SEASON.xml",
 	"DBF/WING.xml",
-
 ]
+
+STRINGS = [
+	"CREDITS_2014.txt",
+	"CREDITS_2015.txt",
+	"GAMEPLAY_AUDIO.txt",
+	"GAMEPLAY.txt",
+	"GLOBAL.txt",
+	"GLUE.txt",
+	"MISSION_AUDIO.txt",
+	"PRESENCE.txt",
+	"TUTORIAL_AUDIO.txt",
+	"TUTORIAL.txt",
+]
+
 MPQ_REGEX = re.compile(r"hs-(\d+)-(\d+)-Win-final.MPQ")
 
 
 def extract(mpq, build, extract_to):
-	for path in EXTRACT:
+	def _extract(path):
 		if path not in mpq:
 			# print("Skipping %r (not found)" % (path))
-			continue
+			return
 		data = mpq.open(path).read()
 		extract_path = os.path.join(extract_to, str(build), path)
 		dirname = os.path.dirname(extract_path)
@@ -50,6 +65,13 @@ def extract(mpq, build, extract_to):
 
 		with open(extract_path, "wb") as f:
 			f.write(data)
+
+	for path in EXTRACT:
+		_extract(path)
+
+	for locale in enums.Locale:
+		for filename in STRINGS:
+			_extract("Strings/%s/%s" % (locale.name, filename))
 
 
 def get_builds(basepath):
