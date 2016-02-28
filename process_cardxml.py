@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 import sys
+from argparse import ArgumentParser, FileType
 from xml.dom import minidom
 from xml.etree import ElementTree
 
@@ -89,15 +90,14 @@ def clean_entity(xml):
 def clean_entourage_ids(xml, dbf):
 	guids = {}
 
-	with open(dbf, "r") as f:
-		dbfxml = ElementTree.parse(f)
-		for record in dbfxml.findall("Record"):
-			long_guid = record.find("./Field[@column='LONG_GUID']")
-			if long_guid is None:
-				return
-			long_guid = long_guid.text
-			mini_guid = record.find("./Field[@column='NOTE_MINI_GUID']").text
-			guids[long_guid] = mini_guid
+	dbfxml = ElementTree.parse(dbf)
+	for record in dbfxml.findall("Record"):
+		long_guid = record.find("./Field[@column='LONG_GUID']")
+		if long_guid is None:
+			return
+		long_guid = long_guid.text
+		mini_guid = record.find("./Field[@column='NOTE_MINI_GUID']").text
+		guids[long_guid] = mini_guid
 
 	for entity in xml.findall("Entity"):
 		for entourage in entity.findall("EntourageCard"):
@@ -219,26 +219,25 @@ def detect_build(path):
 
 
 def main():
-	if len(sys.argv) < 3:
-		print("Usage: %s <indir> <outfile> [carddbf]" % sys.argv[0])
-		exit(1)
+	p = ArgumentParser()
+	p.add_argument("-i", "--indir", nargs=1, type=str)
+	p.add_argument("-o", "--outfile", nargs=1, type=FileType("w"))
+	p.add_argument("--dbf", nargs="?", type=FileType("r"))
+	args = p.parse_args(sys.argv[1:])
 
-	indir = sys.argv[1]
-	outfile = sys.argv[2]
-
+	indir = args.indir[0]
 	if not os.path.exists(os.path.join(indir, "enUS.txt")):
 		xml = merge_card_files(indir)
 	else:
 		xml = merge_locale_files(indir)
 
-	if len(sys.argv) == 4:
-		clean_entourage_ids(xml, sys.argv[3])
+	if args.dbf:
+		clean_entourage_ids(xml, args.dbf)
 
 	build = detect_build(indir)
 	xml.attrib["build"] = str(build)
 
-	with open(outfile, "w") as f:
-		f.write(pretty_xml(xml))
+	args.outfile[0].write(pretty_xml(xml))
 
 
 if __name__ == "__main__":

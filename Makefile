@@ -54,5 +54,9 @@ $(EXTRACTED_DIR)/%/:
 	$(eval TextAsset := $(shell find $@ -name TextAsset -type d))
 	$(eval DBF := $(shell find $@ -name CARD.xml -type f))
 	@mkdir -p $(outdir)
-	@$(PROCESS_CARDXML_BIN) $(TextAsset) $(outdir)/CardDefs.xml $(DBF)
+	@if [ -z "$(DBF)" ]; then \
+		$(PROCESS_CARDXML_BIN) -i $(TextAsset) -o $(outdir)/CardDefs.xml; \
+	else \
+		$(PROCESS_CARDXML_BIN) -i $(TextAsset) -o $(outdir)/CardDefs.xml --dbf $(DBF); \
+	fi
 	@test -d $@/DBF && cp -rf $@/DBF $(outdir) || exit 0
