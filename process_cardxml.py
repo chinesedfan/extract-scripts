@@ -232,6 +232,7 @@ def main():
 		xml = merge_locale_files(indir)
 
 	if args.dbf:
+		print("Processing DBF %r" % (args.dbf.name))
 		clean_entourage_ids(xml, args.dbf)
 
 	build = detect_build(indir)
