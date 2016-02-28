@@ -116,7 +116,7 @@ function _update-hsdata() {
 	playerrors="$BUILDDIR/extracted/$BUILD/Data/PlayErrors.xml"
 	[[ -s "$manifest" ]] && cp "$manifest" "$REPO"
 	[[ -s "$playerrors" ]] && cp "$playerrors" "$REPO"
-	rm -rf "$REPO/DBF"
+	rm -rf "$REPO/DBF" "$REPO/Strings"
 	cp -rf "$dir"/* "$REPO"
 }
 

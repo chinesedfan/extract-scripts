@@ -58,5 +58,6 @@ $(EXTRACTED_DIR)/%/:
 		$(PROCESS_CARDXML_BIN) -i $(TextAsset) -o $(outdir)/CardDefs.xml; \
 	else \
 		$(PROCESS_CARDXML_BIN) -i $(TextAsset) -o $(outdir)/CardDefs.xml --dbf $(DBF); \
+		cp -rf $@/DBF $(outdir); \
 	fi
-	@test -d $@/DBF && cp -rf $@/DBF $(outdir) || exit 0
+	@cp -rf $@/Strings $(outdir)
