@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 import sys
+import unitypack
 from argparse import ArgumentParser, FileType
 from xml.dom import minidom
 from xml.etree import ElementTree
@@ -118,9 +119,8 @@ def make_carddefs(entities):
 	return root
 
 
-def merge_card_files(path):
-	print("Performing card merge on %r" % (path))
-	entities = {}
+def merge_card_assets(cards):
+	print("Performing card merge on %i items" % (len(cards)))
 
 	def _clean_tag(tag):
 		locale_elems = {e.tag: e for e in tag}
@@ -138,29 +138,23 @@ def merge_card_files(path):
 		for t in tag:
 			t.text = t.text.replace("\\n", "\n")
 
-	for filename in os.listdir(path):
-		with open(os.path.join(path, filename), "r") as f:
-			xml = ElementTree.parse(f)
-			entity = xml.getroot()
-			id = entity.attrib["CardID"]
-			entities[id] = entity
+	for id, entity in cards.items():
+		# Fix the locale tags
+		for tag in entity.findall("Tag[@type='String']"):
+			if tag.attrib["enumID"] in UNTRANSLATED_ENUMIDS:
+				# "untranslate" the string
+				tag.text = tag.find("enUS").text
+				for lt in tag:
+					tag.remove(lt)
+				continue
+			_clean_tag(tag)
 
-			# Fix the locale tags
-			for tag in entity.findall("Tag[@type='String']"):
-				if tag.attrib["enumID"] in UNTRANSLATED_ENUMIDS:
-					# "untranslate" the string
-					tag.text = tag.find("enUS").text
-					for lt in tag:
-						tag.remove(lt)
-					continue
-				_clean_tag(tag)
+		# Very old TriggeredPowerHistoryInfo tags were sometimes localized
+		tag = entity.find("TriggeredPowerHistoryInfo")
+		if tag is not None and len(tag):
+			_clean_tag(tag)
 
-			# Very old TriggeredPowerHistoryInfo tags were sometimes localized
-			tag = entity.find("TriggeredPowerHistoryInfo")
-			if tag is not None and len(tag):
-				_clean_tag(tag)
-
-	return make_carddefs(entities)
+	return make_carddefs(cards)
 
 
 def _make_locale_tag(text, locale):
@@ -188,28 +182,24 @@ def _prepare_strings(xml, locale):
 		tag.attrib["type"] = "LocString"
 
 
-def merge_locale_files(path):
-	print("Performing locale merge on %r" % (path))
+def merge_locale_assets(data):
+	print("Performing locale merge")
 	entities = {}
 
 	# Ensure we process enUS first
-	files = sorted(os.listdir(path))
-	files.insert(0, files.pop(files.index("enUS.txt")))
+	locales = sorted(data.keys())
+	locales.insert(0, locales.pop(locales.index("enUS")))
 
-	for filename in files:
-		locale = os.path.splitext(filename)[0]
-		if locale in IGNORE_LOCALES:
-			continue
-		with open(os.path.join(path, filename), "r") as f:
-			xml = ElementTree.parse(f)
-			for entity in xml.findall("Entity"):
-				id = entity.attrib["CardID"]
-				# print("Merging card %r" % (id))
-				if id not in entities:
-					_prepare_strings(entity, locale)
-					entities[id] = entity
-				else:
-					_merge_strings(entities[id], entity, locale)
+	for locale in locales:
+		xml = data[locale]
+		for entity in xml.findall("Entity"):
+			id = entity.attrib["CardID"]
+			# print("Merging card %r" % (id))
+			if id not in entities:
+				_prepare_strings(entity, locale)
+				entities[id] = entity
+			else:
+				_merge_strings(entities[id], entity, locale)
 
 	return make_carddefs(entities)
 
@@ -220,24 +210,39 @@ def detect_build(path):
 
 def main():
 	p = ArgumentParser()
-	p.add_argument("-i", "--indir", nargs=1, type=str)
+	p.add_argument("bundles", nargs="?", type=FileType("rb"))
 	p.add_argument("-o", "--outfile", nargs=1, type=FileType("w"))
 	p.add_argument("--dbf", nargs="?", type=FileType("r"))
 	args = p.parse_args(sys.argv[1:])
 
-	indir = args.indir[0]
-	if not os.path.exists(os.path.join(indir, "enUS.txt")):
-		xml = merge_card_files(indir)
-	else:
-		xml = merge_locale_files(indir)
+	bundle = args.bundles
+	build = detect_build(bundle.name)
+	bundle = unitypack.load(bundle)
+	data = {}
+	for asset in bundle.assets:
+		if asset.name == "CAB-cardxml0":
+			do_locales = "enUS" in asset.objects
+			print("Processing %r" % (asset))
+			for id, obj in asset.objects.items():
+				d = obj.read()
+				if obj.type == "TextAsset":
+					if do_locales and d.name in IGNORE_LOCALES:
+						continue
+					data[d.name] = ElementTree.fromstring(d.script)
+
+			if do_locales:
+				xml = merge_locale_assets(data)
+			else:
+				xml = merge_card_assets(data)
+			break
 
 	if args.dbf:
 		print("Processing DBF %r" % (args.dbf.name))
 		clean_entourage_ids(xml, args.dbf)
 
-	build = detect_build(indir)
 	xml.attrib["build"] = str(build)
 
+	print("Writing to %r" % (args.outfile[0].name))
 	args.outfile[0].write(pretty_xml(xml))
 
 

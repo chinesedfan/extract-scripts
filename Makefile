@@ -8,7 +8,6 @@ PROCESSED_DIR := $(BUILD_DIR)/processed
 PROTOS_DIR := $(BUILD_DIR)/protos
 PROTOS_GO_DIR := $(BUILD_DIR)/go-protos
 DECOMPILER_BIN := mono $(BASE_DIR)/decompiler/build/decompile.exe
-DISUNITY_BIN := disunity
 EXTRACT_MPQ_BIN := $(BASE_DIR)/extract_mpq.py
 PROCESS_CARDXML_BIN := $(BASE_DIR)/process_cardxml.py
 PROTO_EXTRACTOR_BIN := $(BASE_DIR)/../csharp-proto-extractor/bin/Debug/csharp-proto-extractor.exe
@@ -17,11 +16,10 @@ PROTO_EXTRACTOR_BIN := $(BASE_DIR)/../csharp-proto-extractor/bin/Debug/csharp-pr
 .PHONY: all extract process decompile clean
 
 
-all: extract process decompile
+all: process decompile
 
 extract:
 	$(EXTRACT_MPQ_BIN) $(EXTRACTED_DIR)
-	$(DISUNITY_BIN) --include TextAsset --recursive extract $(EXTRACTED_DIR)/**/*.unity3d
 
 process:
 	@mkdir -p $(PROCESSED_DIR)
@@ -51,13 +49,13 @@ $(PROCESSED_DIR)/%/: $(EXTRACTED_DIR)/%/
 $(EXTRACTED_DIR)/%/:
 	$(eval buildnum := $(notdir $(patsubst %/,%,$@)))
 	$(eval outdir := $(PROCESSED_DIR)/$(buildnum))
-	$(eval TextAsset := $(shell find $@ -name TextAsset -type d))
+	$(eval bundles := $(shell find $@ -name '*.unity3d' -type f))
 	$(eval DBF := $(shell find $@ -name CARD.xml -type f))
 	@mkdir -p $(outdir)
 	@if [ -z "$(DBF)" ]; then \
-		$(PROCESS_CARDXML_BIN) -i $(TextAsset) -o $(outdir)/CardDefs.xml; \
+		$(PROCESS_CARDXML_BIN) -o $(outdir)/CardDefs.xml $(bundles); \
 	else \
-		$(PROCESS_CARDXML_BIN) -i $(TextAsset) -o $(outdir)/CardDefs.xml --dbf $(DBF); \
+		$(PROCESS_CARDXML_BIN) -o $(outdir)/CardDefs.xml --dbf $(DBF) $(bundles); \
 		cp -rf $@/DBF $(outdir); \
 	fi
 	@cp -rf $@/Strings $(outdir)
