@@ -150,9 +150,8 @@ def main():
 
 	for path in paths:
 		builds = get_builds(path)
-		if not builds:
-			extract_plain(path, extract_to, only=filter_builds)
-		else:
+		extract_plain(path, extract_to, only=filter_builds)
+		if builds:
 			chains = get_build_chains(builds)
 			for chain in chains:
 				extract_chain(path, chain, extract_to, only=filter_builds)
