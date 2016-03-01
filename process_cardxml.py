@@ -221,7 +221,7 @@ def main():
 	data = {}
 	for asset in bundle.assets:
 		if asset.name == "CAB-cardxml0":
-			do_locales = "enUS" in asset.objects
+			do_locales = len(asset.objects) < 20
 			print("Processing %r" % (asset))
 			for id, obj in asset.objects.items():
 				d = obj.read()
