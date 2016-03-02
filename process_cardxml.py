@@ -219,22 +219,20 @@ def main():
 	build = detect_build(bundle.name)
 	bundle = unitypack.load(bundle)
 	data = {}
-	for asset in bundle.assets:
-		if asset.name == "CAB-cardxml0":
-			do_locales = len(asset.objects) < 20
-			print("Processing %r" % (asset))
-			for id, obj in asset.objects.items():
-				d = obj.read()
-				if obj.type == "TextAsset":
-					if do_locales and d.name in IGNORE_LOCALES:
-						continue
-					data[d.name] = ElementTree.fromstring(d.script)
+	asset = bundle.assets[0]
+	do_locales = len(asset.objects) < 20
+	print("Processing %r" % (asset))
+	for id, obj in asset.objects.items():
+		d = obj.read()
+		if obj.type == "TextAsset":
+			if do_locales and d.name in IGNORE_LOCALES:
+				continue
+			data[d.name] = ElementTree.fromstring(d.script)
 
-			if do_locales:
-				xml = merge_locale_assets(data)
-			else:
-				xml = merge_card_assets(data)
-			break
+	if do_locales:
+		xml = merge_locale_assets(data)
+	else:
+		xml = merge_card_assets(data)
 
 	if args.dbf:
 		print("Processing DBF %r" % (args.dbf.name))
