@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import re
 import sys
 import unitypack
 from argparse import ArgumentParser, FileType
@@ -208,6 +209,16 @@ def detect_build(path):
 	return int([x for x in path.split(os.path.sep) if x.isdigit()][0])
 
 
+def guess_overload(text):
+	sre = re.search(r"Overload[^(]+\((\d+)\)", text)
+	return int(sre.groups()[0])
+
+
+def guess_spellpower(text):
+	sre = re.search(r"Spell (?:Power|Damage) \+(\d+)", text)
+	return int(sre.groups()[0])
+
+
 def main():
 	p = ArgumentParser()
 	p.add_argument("bundles", nargs="?", type=FileType("rb"))
@@ -233,6 +244,17 @@ def main():
 		xml = merge_locale_assets(data)
 	else:
 		xml = merge_card_assets(data)
+
+	for entity in xml.findall("Entity"):
+		overload = entity.find("Tag[@enumID='215']")
+		if overload is not None:
+			description = entity.find("Tag[@enumID='184']/enUS").text
+			overload.attrib["value"] = str(guess_overload(description))
+
+		spellpower = entity.find("Tag[@enumID='192']")
+		if spellpower is not None:
+			description = entity.find("Tag[@enumID='184']/enUS").text
+			spellpower.attrib["value"] = str(guess_spellpower(description))
 
 	if args.dbf:
 		print("Processing DBF %r" % (args.dbf.name))
