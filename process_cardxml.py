@@ -229,21 +229,28 @@ def main():
 	bundle = args.bundles
 	build = detect_build(bundle.name)
 	bundle = unitypack.load(bundle)
-	data = {}
 	asset = bundle.assets[0]
-	do_locales = len(asset.objects) < 20
-	print("Processing %r" % (asset))
-	for id, obj in asset.objects.items():
-		d = obj.read()
-		if obj.type == "TextAsset":
-			if do_locales and d.name in IGNORE_LOCALES:
-				continue
-			data[d.name] = ElementTree.fromstring(d.script)
 
-	if do_locales:
-		xml = merge_locale_assets(data)
+	carddefs = {}
+	entities = {}
+
+	print("Processing %r" % (asset))
+	for obj in asset.objects.values():
+		if obj.type == "TextAsset":
+			d = obj.read()
+			if d.name in IGNORE_LOCALES:
+				continue
+			if d.script.startswith("<CardDefs>"):
+				carddefs[d.name] = ElementTree.fromstring(d.script)
+			elif d.script.startswith("<?xml "):
+				entities[d.name] = ElementTree.fromstring(d.script)
+			else:
+				raise Exception("Bad TextAsset %r" % (d))
+
+	if carddefs:
+		xml = merge_locale_assets(carddefs)
 	else:
-		xml = merge_card_assets(data)
+		xml = merge_card_assets(entities)
 
 	for entity in xml.findall("Entity"):
 		overload = entity.find("Tag[@enumID='215']")
