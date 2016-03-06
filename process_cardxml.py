@@ -221,31 +221,31 @@ def guess_spellpower(text):
 
 def main():
 	p = ArgumentParser()
-	p.add_argument("bundles", nargs="?", type=FileType("rb"))
+	p.add_argument("bundles", nargs="+", type=FileType("rb"))
 	p.add_argument("-o", "--outfile", nargs=1, type=FileType("w"))
 	p.add_argument("--dbf", nargs="?", type=FileType("r"))
 	args = p.parse_args(sys.argv[1:])
 
-	bundle = args.bundles
-	build = detect_build(bundle.name)
-	bundle = unitypack.load(bundle)
-	asset = bundle.assets[0]
+	build = detect_build(args.bundles[0].name)
 
 	carddefs = {}
 	entities = {}
 
-	print("Processing %r" % (asset))
-	for obj in asset.objects.values():
-		if obj.type == "TextAsset":
-			d = obj.read()
-			if d.name in IGNORE_LOCALES:
-				continue
-			if d.script.startswith("<CardDefs>"):
-				carddefs[d.name] = ElementTree.fromstring(d.script)
-			elif d.script.startswith("<?xml "):
-				entities[d.name] = ElementTree.fromstring(d.script)
-			else:
-				raise Exception("Bad TextAsset %r" % (d))
+	for f in args.bundles:
+		bundle = unitypack.load(f)
+		asset = bundle.assets[0]
+		print("Processing %r" % (asset))
+		for obj in asset.objects.values():
+			if obj.type == "TextAsset":
+				d = obj.read()
+				if d.name in IGNORE_LOCALES:
+					continue
+				if d.script.startswith("<CardDefs>"):
+					carddefs[d.name] = ElementTree.fromstring(d.script)
+				elif d.script.startswith("<?xml "):
+					entities[d.name] = ElementTree.fromstring(d.script)
+				else:
+					raise Exception("Bad TextAsset %r" % (d))
 
 	if carddefs:
 		xml = merge_locale_assets(carddefs)
