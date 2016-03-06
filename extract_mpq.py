@@ -57,6 +57,9 @@ def extract(mpq, build, extract_to):
 			# print("Skipping %r (not found)" % (path))
 			return
 		data = mpq.open(path).read()
+		if not data:
+			print("Skipping %r (empty)" % (path))
+			return
 		extract_path = os.path.join(extract_to, str(build), path)
 		dirname = os.path.dirname(extract_path)
 		if not os.path.exists(dirname):
