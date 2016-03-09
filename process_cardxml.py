@@ -219,6 +219,10 @@ def guess_spellpower(text):
 	return int(sre.groups()[0])
 
 
+def reverse_texture_path(path):
+	return os.path.splitext(os.path.basename(path))[0]
+
+
 def main():
 	p = ArgumentParser()
 	p.add_argument("bundles", nargs="+", type=FileType("rb"))
@@ -230,6 +234,7 @@ def main():
 
 	carddefs = {}
 	entities = {}
+	textures = {}
 
 	for f in args.bundles:
 		bundle = unitypack.load(f)
@@ -246,6 +251,17 @@ def main():
 					entities[d.name] = ElementTree.fromstring(d.script)
 				else:
 					raise Exception("Bad TextAsset %r" % (d))
+			elif obj.type == "CardDef":
+				d = obj.read()
+				cardid = d["m_GameObject"].resolve().name
+				if "m_PortraitTexture" in d:
+					ptr = d["m_PortraitTexture"]
+					if not ptr:
+						continue
+					texture = ptr.resolve().name
+				else:
+					texture = reverse_texture_path(d["m_PortraitTexturePath"])
+				textures[cardid] = texture
 
 	if carddefs:
 		xml = merge_locale_assets(carddefs)
@@ -253,6 +269,7 @@ def main():
 		xml = merge_card_assets(entities)
 
 	for entity in xml.findall("Entity"):
+		id = entity.attrib["CardID"]
 		overload = entity.find("Tag[@enumID='215']")
 		if overload is not None:
 			description = entity.find("Tag[@enumID='184']/enUS").text
@@ -262,6 +279,11 @@ def main():
 		if spellpower is not None:
 			description = entity.find("Tag[@enumID='184']/enUS").text
 			spellpower.attrib["value"] = str(guess_spellpower(description))
+
+		if id in textures:
+			e = ElementTree.Element("Texture")
+			e.text = textures[id]
+			entity.append(e)
 
 	if args.dbf:
 		print("Processing DBF %r" % (args.dbf.name))
