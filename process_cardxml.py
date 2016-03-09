@@ -12,6 +12,11 @@ UNTRANSLATED_ENUMIDS = (
 	"342",  # ArtistName
 )
 
+MISSING_HERO_POWERS = {
+	"BRM_027h": "BRM_027p",
+	"EX1_323h": "EX1_tk33",
+}
+
 IGNORE_LOCALES = ("enGB", "ptPT")
 
 TAGS = {
@@ -87,6 +92,33 @@ def clean_entity(xml):
 			tag.attrib["type"] = type
 
 	return xml
+
+
+def load_dbf(dbfxml):
+	db = {}
+	guids = {}
+	hero_powers = {}
+	for record in dbfxml.findall("Record"):
+		id = int(record.find("./Field[@column='ID']").text)
+		long_guid = record.find("./Field[@column='LONG_GUID']")
+		mini_guid = record.find("./Field[@column='NOTE_MINI_GUID']").text
+		hero_power_id = int(record.find("./Field[@column='HERO_POWER_ID']").text or 0)
+		db[id] = mini_guid
+		if long_guid is not None:
+			long_guid = long_guid.text
+			guids[long_guid] = mini_guid
+		if hero_power_id:
+			hero_powers[mini_guid] = hero_power_id
+
+	for k, v in hero_powers.items():
+		hero_powers[k] = db[v]
+
+	for k, v in MISSING_HERO_POWERS.items():
+		# Some hero powers are missing from the DBF...
+		assert k not in hero_powers
+		hero_powers[k] = v
+
+	return guids, hero_powers
 
 
 def clean_entourage_ids(xml, guids):
@@ -257,6 +289,14 @@ def main():
 	else:
 		xml = merge_card_assets(entities)
 
+	hero_powers = {}
+	if args.dbf:
+		print("Processing DBF %r" % (args.dbf.name))
+		dbfxml = ElementTree.parse(args.dbf)
+		guids, hero_powers = load_dbf(dbfxml)
+
+		clean_entourage_ids(xml, guids)
+
 	for entity in xml.findall("Entity"):
 		id = entity.attrib["CardID"]
 
@@ -282,19 +322,10 @@ def main():
 			e.text = textures[id]
 			entity.append(e)
 
-	if args.dbf:
-		print("Processing DBF %r" % (args.dbf.name))
-		dbfxml = ElementTree.parse(args.dbf)
-		guids = {}
-		for record in dbfxml.findall("Record"):
-			long_guid = record.find("./Field[@column='LONG_GUID']")
-			if long_guid is None:
-				return
-			long_guid = long_guid.text
-			mini_guid = record.find("./Field[@column='NOTE_MINI_GUID']").text
-			guids[long_guid] = mini_guid
-
-		clean_entourage_ids(xml, guids)
+		if id in hero_powers:
+			e = ElementTree.Element("HeroPower")
+			e.attrib["cardID"] = hero_powers[id]
+			entity.append(e)
 
 	xml.attrib["build"] = str(build)
 
