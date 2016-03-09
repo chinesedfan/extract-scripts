@@ -270,6 +270,14 @@ def main():
 
 	for entity in xml.findall("Entity"):
 		id = entity.attrib["CardID"]
+
+		# Clean up MasterPower whitespace
+		power = entity.find("MasterPower")
+		if power is not None:
+			power.text = power.text.strip()
+			if not power.text:
+				entity.remove(power)
+
 		overload = entity.find("Tag[@enumID='215']")
 		if overload is not None:
 			description = entity.find("Tag[@enumID='184']/enUS").text
