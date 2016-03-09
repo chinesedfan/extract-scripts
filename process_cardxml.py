@@ -141,7 +141,7 @@ def make_carddefs(entities):
 	return root
 
 
-def merge_card_assets(cards):
+def merge_card_assets(cards, build):
 	print("Performing card merge on %i items" % (len(cards)))
 
 	def _clean_tag(tag):
@@ -150,10 +150,17 @@ def merge_card_assets(cards):
 		for locale in IGNORE_LOCALES:
 			if locale in keys:
 				keys.pop(keys.index(locale))
-		if "enUS" in keys:
+
+		# Nothing was localized before build 3604
+		if build < 3604:
+			keys = ["enUS"]
+
+		elif "enUS" in keys:
 			# When enUS was removed from TriggeredPowerHistoryInfo,
 			# the other locales weren't...
 			keys.insert(0, keys.pop(keys.index("enUS")))
+
+		# Nothing was localized before build 3604
 		tag[:] = [locale_elems[k] for k in keys]
 		tag.attrib["type"] = "LocString"
 		# unescape newlines
@@ -287,7 +294,7 @@ def main():
 	if carddefs:
 		xml = merge_locale_assets(carddefs)
 	else:
-		xml = merge_card_assets(entities)
+		xml = merge_card_assets(entities, build)
 
 	hero_powers = {}
 	if args.dbf:
