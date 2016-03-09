@@ -89,18 +89,7 @@ def clean_entity(xml):
 	return xml
 
 
-def clean_entourage_ids(xml, dbf):
-	guids = {}
-
-	dbfxml = ElementTree.parse(dbf)
-	for record in dbfxml.findall("Record"):
-		long_guid = record.find("./Field[@column='LONG_GUID']")
-		if long_guid is None:
-			return
-		long_guid = long_guid.text
-		mini_guid = record.find("./Field[@column='NOTE_MINI_GUID']").text
-		guids[long_guid] = mini_guid
-
+def clean_entourage_ids(xml, guids):
 	for entity in xml.findall("Entity"):
 		for entourage in entity.findall("EntourageCard"):
 			guid = entourage.attrib["cardID"]
@@ -295,7 +284,17 @@ def main():
 
 	if args.dbf:
 		print("Processing DBF %r" % (args.dbf.name))
-		clean_entourage_ids(xml, args.dbf)
+		dbfxml = ElementTree.parse(args.dbf)
+		guids = {}
+		for record in dbfxml.findall("Record"):
+			long_guid = record.find("./Field[@column='LONG_GUID']")
+			if long_guid is None:
+				return
+			long_guid = long_guid.text
+			mini_guid = record.find("./Field[@column='NOTE_MINI_GUID']").text
+			guids[long_guid] = mini_guid
+
+		clean_entourage_ids(xml, guids)
 
 	xml.attrib["build"] = str(build)
 
