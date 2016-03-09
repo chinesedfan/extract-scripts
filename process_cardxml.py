@@ -323,6 +323,7 @@ def main():
 		if spellpower is not None:
 			description = entity.find("Tag[@enumID='184']/enUS").text
 			spellpower.attrib["value"] = str(guess_spellpower(description))
+			spellpower.attrib["type"] = "Int"
 
 		if id in textures:
 			e = ElementTree.Element("Texture")
