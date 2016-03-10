@@ -289,7 +289,8 @@ def main():
 					texture = ptr.resolve().name
 				else:
 					texture = reverse_texture_path(d["m_PortraitTexturePath"])
-				textures[cardid] = texture
+				if texture:
+					textures[cardid] = texture
 
 	if carddefs:
 		xml = merge_locale_assets(carddefs)
