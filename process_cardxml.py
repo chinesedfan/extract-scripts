@@ -279,8 +279,14 @@ def main():
 					entities[d.name] = ElementTree.fromstring(d.script)
 				else:
 					raise Exception("Bad TextAsset %r" % (d))
-			elif obj.type == "CardDef":
+			elif obj.type in ("CardDef", "MonoScript"):
 				d = obj.read()
+				if "m_GameObject" not in d:
+					# We check for MonoScript because type checks through asset
+					# references does not return the real class name yet.
+					# This means we have to check for GameObject in the obj to
+					# make sure it's actually a card.
+					continue
 				cardid = d["m_GameObject"].resolve().name
 				if "m_PortraitTexture" in d:
 					ptr = d["m_PortraitTexture"]
