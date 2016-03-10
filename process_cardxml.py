@@ -292,7 +292,10 @@ def main():
 					ptr = d["m_PortraitTexture"]
 					if not ptr:
 						continue
-					texture = ptr.resolve().name
+					try:
+						texture = ptr.resolve().name
+					except NotImplementedError:
+						texture = ""
 				else:
 					texture = reverse_texture_path(d["m_PortraitTexturePath"])
 				if texture:
