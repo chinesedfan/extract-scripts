@@ -6,6 +6,7 @@ import unitypack
 from argparse import ArgumentParser, FileType
 from xml.dom import minidom
 from xml.etree import ElementTree
+from hearthstone.enums import GameTag
 
 
 UNTRANSLATED_ENUMIDS = (
@@ -92,6 +93,14 @@ def clean_entity(xml):
 			tag.attrib["type"] = type
 
 	return xml
+
+
+def set_tag(entity, tag, value, type):
+	e = ElementTree.Element("Tag")
+	e.attrib["enumID"] = str(int(tag))
+	e.attrib["value"] = str(value)
+	e.attrib["type"] = type
+	entity.append(e)
 
 
 def load_dbf(dbfxml):
@@ -334,6 +343,10 @@ def main():
 		if spellpower is not None:
 			spellpower.attrib["value"] = str(guess_spellpower(description))
 			spellpower.attrib["type"] = "Int"
+
+		if "Can't be targeted by spells or Hero Powers." in description:
+			set_tag(entity, GameTag.CANT_BE_TARGETED_BY_ABILITIES, 1, type="Bool")
+			set_tag(entity, GameTag.CANT_BE_TARGETED_BY_HERO_POWERS, 1, type="Bool")
 
 		if id in textures:
 			e = ElementTree.Element("Texture")
