@@ -348,6 +348,9 @@ def main():
 			set_tag(entity, GameTag.CANT_BE_TARGETED_BY_ABILITIES, 1, type="Bool")
 			set_tag(entity, GameTag.CANT_BE_TARGETED_BY_HERO_POWERS, 1, type="Bool")
 
+		if "Can't attack." in description or "Can't Attack." in description:
+			set_tag(entity, GameTag.CANT_ATTACK, 1, type="Bool")
+
 		if id in textures:
 			e = ElementTree.Element("Texture")
 			e.text = textures[id]
