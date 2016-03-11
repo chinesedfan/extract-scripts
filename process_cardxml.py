@@ -316,6 +316,8 @@ def main():
 
 	for entity in xml.findall("Entity"):
 		id = entity.attrib["CardID"]
+		description = entity.find("Tag[@enumID='184']/enUS")
+		description = description.text if description is not None else ""
 
 		# Clean up MasterPower whitespace
 		power = entity.find("MasterPower")
@@ -326,12 +328,10 @@ def main():
 
 		overload = entity.find("Tag[@enumID='215']")
 		if overload is not None:
-			description = entity.find("Tag[@enumID='184']/enUS").text
 			overload.attrib["value"] = str(guess_overload(description))
 
 		spellpower = entity.find("Tag[@enumID='192']")
 		if spellpower is not None:
-			description = entity.find("Tag[@enumID='184']/enUS").text
 			spellpower.attrib["value"] = str(guess_spellpower(description))
 			spellpower.attrib["type"] = "Int"
 
