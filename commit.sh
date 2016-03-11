@@ -82,6 +82,8 @@ function _init-repo() {
 	$GIT remote add origin "$REMOTE"
 	$GIT add README.md
 	$GIT commit -m "Initial commit"
+	$GIT config branch.master.remote origin
+	$GIT config branch.master.merge refs/heads/master
 }
 
 function _commit() {
