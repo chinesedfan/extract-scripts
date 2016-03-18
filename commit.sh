@@ -135,6 +135,13 @@ function _update-hsproto() {
 }
 
 
+if [[ ! -z "$1" ]]; then
+	_commit hsdata $1
+	_commit hscode $1
+	_commit hsproto $1
+	exit
+fi
+
 _init-repo "hsdata"
 
 for BUILD in "${!patches[@]}"; do
@@ -154,4 +161,3 @@ _init-repo "hsproto"
 for BUILD in "${!patches[@]}"; do
 	_commit hsproto $BUILD
 done
-

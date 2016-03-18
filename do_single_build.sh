@@ -14,3 +14,5 @@ make -B \
 	"$EXTRACTED_DIR/$BUILD/" \
 	"$EXTRACTED_DIR/$BUILD/Hearthstone_Data/Managed/Assembly-CSharp.dll" \
 	"$EXTRACTED_DIR/$BUILD/Hearthstone_Data/Managed/Assembly-CSharp-firstpass.dll"
+
+./commit.sh $BUILD
