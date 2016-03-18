@@ -77,9 +77,9 @@ TAGS = {
 
 
 def pretty_xml(xml):
-	ret = ElementTree.tostring(xml)
-	ret = minidom.parseString(ret).toprettyxml(indent="\t")
-	return "\n".join(line for line in ret.split("\n") if line.strip())
+	ret = ElementTree.tostring(xml, encoding="utf-8")
+	ret = minidom.parseString(ret).toprettyxml(indent="\t", encoding="utf-8")
+	return b"\n".join(line for line in ret.split(b"\n") if line.strip())
 
 
 def clean_entity(xml):
@@ -263,7 +263,7 @@ def reverse_texture_path(path):
 def main():
 	p = ArgumentParser()
 	p.add_argument("bundles", nargs="+", type=FileType("rb"))
-	p.add_argument("-o", "--outfile", nargs=1, type=FileType("w"))
+	p.add_argument("-o", "--outfile", nargs=1, type=FileType("wb"))
 	p.add_argument("--dbf", nargs="?", type=FileType("r"))
 	args = p.parse_args(sys.argv[1:])
 
