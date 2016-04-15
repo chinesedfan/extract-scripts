@@ -127,7 +127,7 @@ function _update-hsdata() {
 }
 
 function _update-hscode() {
-	rm -rf "$REPO"/**/*.cs
+	rm -rf "$REPO"/*.cs "$REPO"/**/*.cs
 	cp -rf "$dir"/* "$REPO"
 }
 
