@@ -99,7 +99,7 @@ function _commit() {
 	dir="${directories[$PROJECT]}/$BUILD"
 	export GIT_AUTHOR_DATE="$date"
 
-	[[ -d "$dir" ]] || continue
+	[[ -d "$dir" ]] || return
 	echo "Committing $PROJECT for $patch.$BUILD"
 
 	sed -i "s/Version: .*/Version: $patch.$BUILD/" "$REPO/README.md"
