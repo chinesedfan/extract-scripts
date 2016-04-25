@@ -248,11 +248,17 @@ def detect_build(path):
 
 def guess_overload(text):
 	sre = re.search(r"Overload[^(]+\((\d+)\)", text)
+	if sre is None:
+		print("WARNING: Could not guess overload in %r" % (text))
+		return 0
 	return int(sre.groups()[0])
 
 
 def guess_spellpower(text):
 	sre = re.search(r"Spell (?:Power|Damage) \+(\d+)", text)
+	if sre is None:
+		print("WARNING: Could not guess spell power in %r" % (text))
+		return 0
 	return int(sre.groups()[0])
 
 
