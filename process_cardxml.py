@@ -329,6 +329,11 @@ def main():
 
 		clean_entourage_ids(xml, guids)
 
+	if build < 6024:
+		SHROUDED = "Can't be targeted by Spells or Hero Powers."
+	else:
+		SHROUDED = "Can't be targeted by spells or Hero Powers."
+
 	for entity in xml.findall("Entity"):
 		id = entity.attrib["CardID"]
 		description = entity.find("Tag[@enumID='184']/enUS")
@@ -350,7 +355,7 @@ def main():
 			spellpower.attrib["value"] = str(guess_spellpower(description))
 			spellpower.attrib["type"] = "Int"
 
-		if "Can't be targeted by spells or Hero Powers." in description:
+		if SHROUDED in description:
 			set_tag(entity, GameTag.CANT_BE_TARGETED_BY_ABILITIES, 1, type="Bool")
 			set_tag(entity, GameTag.CANT_BE_TARGETED_BY_HERO_POWERS, 1, type="Bool")
 
