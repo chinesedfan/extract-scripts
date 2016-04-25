@@ -255,7 +255,7 @@ def guess_overload(text):
 
 
 def guess_spellpower(text):
-	sre = re.search(r"Spell (?:Power|Damage) \+(\d+)", text)
+	sre = re.search(r"Spell (?:Power|Damage)(?:</b>)? \+(\d+)", text)
 	if sre is None:
 		print("WARNING: Could not guess spell power in %r" % (text))
 		return 0
