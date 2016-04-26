@@ -163,6 +163,9 @@ def main():
 
 	if len(args) == 2:
 		print_report(args[0], args[1])
+	else:
+		for old, new in zip(args, args[1:]):
+			print_report(old, new)
 
 
 if __name__ == "__main__":
