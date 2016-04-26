@@ -10,12 +10,16 @@ def card_diff(first, other):
 		"hero_power": (),
 		"play_requirements": {},
 		"tags": {},
+		"text": {},
 	}
 
 	for tag, value in other.tags.items():
 		old_value = first.tags.get(tag, None)
 		if value != old_value:
-			ret["tags"][tag] = (old_value, value)
+			if tag.string_type:
+				ret["text"][tag] = (old_value, value)
+			else:
+				ret["tags"][tag] = (old_value, value)
 
 	for pr, value in other.requirements.items():
 		old_value = first.requirements.get(pr, None)
@@ -80,18 +84,32 @@ def print_report(first, other):
 		print()
 
 	changed_cards = {}
+	text_changes = {}
 	# Find changed cards
 	for id, card in first.items():
 		if id in deleted_cards:
 			# Skip over deleted cards
 			continue
 		diff = card_diff(card, other[id])
+		if diff["text"]:
+			text_changes[card] = diff.pop("text")
 		if any(diff.values()):
-			changed_cards[card] = diff
+			changed_cards[other[id]] = diff
+
+	if text_changes:
+		text_changes = sorted(text_changes.items(), key=lambda t: t[0].id)
+		print("%i text changes" % (len(text_changes)))
+
+		for card, diff in text_changes:
+			print("* %s (%s)" % (card.name, card.id))
+			for tag, value in diff.items():
+				print_enum_diff(tag, *value)
+		print()
 
 	if changed_cards:
+		changed_cards = sorted(changed_cards.items(), key=lambda t: t[0].id)
 		print("%i changed cards:" % (len(changed_cards)))
-		for card, diff in sorted(changed_cards.items(), key=lambda t: t[0].id):
+		for card, diff in changed_cards:
 			print("* %s (%s)" % (card.name, card.id))
 			for tag, value in diff["tags"].items():
 				print_enum_diff(tag, *value)
@@ -109,7 +127,6 @@ def print_report(first, other):
 					print("    * ADDED: %s" % (", ".join(repr(other[id]) for id in added)))
 				if removed:
 					print("    * REMOVED: %s" % (", ".join(repr(first[id]) for id in removed)))
-
 		print()
 
 	first_tags = get_tags(first.values())
