@@ -42,12 +42,16 @@ def card_diff(first, other):
 	return ret
 
 
-def get_playreqs(cards):
-	ret = set()
-	for card in cards:
-		for playreq in card.requirements:
-			ret.add(playreq)
-	return ret
+def get_new_values(attr, first, other):
+	def get_values(cards):
+		ret = set()
+		for card in cards:
+			for value in getattr(card, attr):
+				ret.add(value)
+		return ret
+
+	old, new = get_values(first.values()), get_values(other.values())
+	return [k for k in new if k not in old]
 
 
 def get_tags(cards):
@@ -129,17 +133,13 @@ def print_report(first, other):
 					print("    * REMOVED: %s" % (", ".join(repr(first[id]) for id in removed)))
 		print()
 
-	first_tags = get_tags(first.values())
-	other_tags = get_tags(other.values())
-	new_tags = [k for k in other_tags if k not in first_tags]
+	new_tags = get_new_values("tags", first, other)
 	if new_tags:
 		print("%i new GameTag:" % (len(new_tags)))
 		print(", ".join(repr(tag) for tag in new_tags))
 		print()
 
-	first_playreqs = get_playreqs(first.values())
-	other_playreqs = get_playreqs(other.values())
-	new_playreqs = [k for k in other_playreqs if k not in first_playreqs]
+	new_playreqs = get_new_values("requirements", first, other)
 	if new_playreqs:
 		print("%i new PlayReq:" % (len(new_playreqs)))
 		print(", ".join(repr(pr) for pr in new_playreqs))
