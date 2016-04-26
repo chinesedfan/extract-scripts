@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import sys
-from argparse import ArgumentParser, FileType
 from hearthstone.cardxml import load as load_cardxml
 
 
@@ -71,7 +70,12 @@ def print_enum_diff(key, before, after):
 		print("  - CHANGED %s: %r -> %r" % (key, before, after))
 
 
-def print_report(first, other):
+def print_report(old_path, new_path):
+	print("OLD: %s" % (old_path))
+	print("NEW: %s\n" % (new_path))
+
+	first, first_xml = load_cardxml(old_path)
+	other, other_xml = load_cardxml(new_path)
 	new_cards = {k: v for k, v in other.items() if k not in first}
 	deleted_cards = {k: v for k, v in first.items() if k not in other}
 
@@ -153,15 +157,12 @@ def print_report(first, other):
 
 
 def main():
-	p = ArgumentParser()
-	p.add_argument("first", nargs=1, type=str)
-	p.add_argument("other", nargs=1, type=str)
-	args = p.parse_args(sys.argv[1:])
+	args = sys.argv[1:]
+	if len(args) < 2:
+		raise ValueError("Need at least two arguments")
 
-	first, first_xml = load_cardxml(args.first[0])
-	other, other_xml = load_cardxml(args.other[0])
-
-	print_report(first, other)
+	if len(args) == 2:
+		print_report(args[0], args[1])
 
 
 if __name__ == "__main__":
