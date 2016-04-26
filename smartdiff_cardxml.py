@@ -139,6 +139,12 @@ def print_report(first, other):
 		print(", ".join(repr(tag) for tag in new_tags))
 		print()
 
+	new_reftags = get_new_values("referenced_tags", first, other)
+	if new_reftags:
+		print("%i new Referenced Tags:" % (len(new_reftags)))
+		print(", ".join(repr(tag) for tag in new_reftags))
+		print()
+
 	new_playreqs = get_new_values("requirements", first, other)
 	if new_playreqs:
 		print("%i new PlayReq:" % (len(new_playreqs)))
