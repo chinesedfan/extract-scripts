@@ -12,4 +12,4 @@ https://hearthstonejson.com
 
 Version: N/A
 
-http://hearthsim.info
+https://hearthsim.info

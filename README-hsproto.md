@@ -9,4 +9,4 @@ game client. Source code for the decompiler available in
 
 Version: N/A
 
-http://hearthsim.info
+https://hearthsim.info
