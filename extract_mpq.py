@@ -141,16 +141,17 @@ def extract_chain(path, chain, extract_to, only=[]):
 
 
 def main():
-	if len(sys.argv) < 2:
-		print("Usage: %s [OUTDIR]" % (sys.argv[0]))
+	if len(sys.argv) < 3:
+		print("Usage: %s <indir> <outdir>" % (sys.argv[0]))
 		exit(1)
 
-	extract_to = sys.argv[1]
+	base_path = sys.argv[1]
+	extract_to = sys.argv[2]
+	filter_builds = [int(x) for x in sys.argv[3:]]
 	direct_builds = [3140, 3388, 3749, 4243, 4944]
-	filter_builds = [int(x) for x in sys.argv[2:]]
 
 	for build in direct_builds:
-		path = os.path.join("HSB", "%i.direct" % (build))
+		path = os.path.join(base_path, "%i.direct" % (build))
 		builds = get_builds(path)
 		extract_plain(path, extract_to, only=filter_builds)
 		if builds:

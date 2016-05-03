@@ -2,6 +2,7 @@ SHELL:=/bin/bash -O globstar
 MAKEFILE := $(lastword $(MAKEFILE_LIST))
 BASE_DIR := $(realpath $(dir $(MAKEFILE)))
 BUILD_DIR := $(BASE_DIR)/build
+MPQ_DIR := $(BUILD_DIR)/MPQ
 DECOMPILED_DIR := $(BUILD_DIR)/decompiled
 EXTRACTED_DIR := $(BUILD_DIR)/extracted
 PROCESSED_DIR := $(BUILD_DIR)/processed
@@ -19,7 +20,7 @@ PROTO_EXTRACTOR_BIN := $(BASE_DIR)/../csharp-proto-extractor/bin/Debug/csharp-pr
 all: process decompile
 
 extract:
-	$(EXTRACT_MPQ_BIN) $(EXTRACTED_DIR)
+	$(EXTRACT_MPQ_BIN) $(MPQ_DIR) $(EXTRACTED_DIR)
 
 process:
 	@mkdir -p $(PROCESSED_DIR)
