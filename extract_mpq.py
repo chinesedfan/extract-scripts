@@ -146,17 +146,11 @@ def main():
 		exit(1)
 
 	extract_to = sys.argv[1]
-	paths = (
-		"HSB/3140.direct",
-		"HSB/3388.direct",
-		"HSB/3749.direct",
-		"HSB/4243.direct",
-		"HSB/4944.direct",
-	)
-
+	direct_builds = [3140, 3388, 3749, 4243, 4944]
 	filter_builds = [int(x) for x in sys.argv[2:]]
 
-	for path in paths:
+	for build in direct_builds:
+		path = os.path.join("HSB", "%i.direct" % (build))
 		builds = get_builds(path)
 		extract_plain(path, extract_to, only=filter_builds)
 		if builds:
