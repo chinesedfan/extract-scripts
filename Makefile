@@ -50,7 +50,7 @@ $(PROCESSED_DIR)/%/: $(EXTRACTED_DIR)/%/
 $(EXTRACTED_DIR)/%/:
 	$(eval buildnum := $(notdir $(patsubst %/,%,$@)))
 	$(eval outdir := $(PROCESSED_DIR)/$(buildnum))
-	$(eval bundles := $(shell find $@ -name '*.unity3d' -type f))
+	$(eval bundles := $(shell find $@/Data/Win -name '*.unity3d' -type f))
 	$(eval DBF := $(shell find $@ -name CARD.xml -type f))
 	@mkdir -p $(outdir)
 	@if [ -z "$(DBF)" ]; then \
