@@ -278,8 +278,18 @@ def main():
 	carddefs = {}
 	entities = {}
 	textures = {}
+	whitelist = [
+		"cards.unity3d",
+		"cards0.unity3d",
+		"cards1.unity3d",
+		"cards2.unity3d",
+		"cardxml0.unity3d",
+	]
 
 	for f in args.bundles:
+		if os.path.basename(f.name) not in whitelist:
+			f.close()
+			continue
 		bundle = unitypack.load(f)
 		asset = bundle.assets[0]
 		print("Processing %r" % (asset))
