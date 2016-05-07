@@ -312,7 +312,7 @@ def main():
 					except NotImplementedError:
 						texture = ""
 				else:
-					texture = reverse_texture_path(d["m_PortraitTexturePath"])
+					texture = reverse_texture_path(d.get("m_PortraitTexturePath", ""))
 				if texture:
 					textures[cardid] = texture
 
