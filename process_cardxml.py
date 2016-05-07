@@ -302,6 +302,9 @@ def main():
 					# This means we have to check for GameObject in the obj to
 					# make sure it's actually a card.
 					continue
+				if d["m_GameObject"] is None:
+					print("Missing m_GameObject for %r" % (obj))
+					continue
 				cardid = d["m_GameObject"].resolve().name
 				if "m_PortraitTexture" in d:
 					ptr = d["m_PortraitTexture"]
