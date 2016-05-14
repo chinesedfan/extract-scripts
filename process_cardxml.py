@@ -141,6 +141,7 @@ def clean_entourage_ids(xml, guids):
 
 
 def make_carddefs(entities):
+	print("Processing %i entities" % (len(entities)))
 	root = ElementTree.Element("CardDefs")
 	ids = sorted(entities.keys(), key=lambda i: i.lower())
 	for id in ids:
