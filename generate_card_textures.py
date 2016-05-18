@@ -36,6 +36,7 @@ def handle_cards_asset(asset, cards):
 def main():
 	p = ArgumentParser()
 	p.add_argument("--outdir", nargs="?", default="")
+	p.add_argument("--skip-existing", action="store_true")
 	p.add_argument("files", nargs="+")
 	args = p.parse_args(sys.argv[1:])
 
@@ -69,6 +70,8 @@ def main():
 		texture = pptr.resolve()
 
 		png = os.path.join(args.outdir, "%s.png" % (id))
+		if args.skip_existing and os.path.exists(png):
+			continue
 		print("%r -> %r" % (path, png))
 		texture.image.save(png)
 
