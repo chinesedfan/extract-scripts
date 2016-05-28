@@ -43,9 +43,11 @@ def main():
 	textures = {}
 	cards = {}
 
+	env = unitypack.UnityEnvironment()
+
 	for file in args.files:
 		with open(file, "rb") as f:
-			bundle = unitypack.load(f)
+			bundle = unitypack.load(f, env)
 
 		for asset in bundle.assets:
 			if asset.name.startswith("CAB-cards"):
