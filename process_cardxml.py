@@ -348,6 +348,8 @@ def main():
 	else:
 		SHROUDED = "Can't be targeted by spells or Hero Powers."
 
+	SPARE_PART_RE = r"PART_\d+"
+
 	for entity in xml.findall("Entity"):
 		id = entity.attrib["CardID"]
 		description = entity.find("Tag[@enumID='184']/enUS")
@@ -375,6 +377,9 @@ def main():
 
 		if "Can't attack." in description or "Can't Attack." in description:
 			set_tag(entity, GameTag.CANT_ATTACK, 1, type="Bool")
+
+		if SPARE_PART_RE.match(id):
+			set_tag(entity, GameTag.SPARE_PART, 1, type="Bool")
 
 		if id in textures:
 			e = ElementTree.Element("Texture")
