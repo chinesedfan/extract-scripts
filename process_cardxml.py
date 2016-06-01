@@ -348,7 +348,7 @@ def main():
 	else:
 		SHROUDED = "Can't be targeted by spells or Hero Powers."
 
-	SPARE_PART_RE = r"PART_\d+"
+	SPARE_PART_RE = re.compile(r"PART_\d+")
 
 	for entity in xml.findall("Entity"):
 		id = entity.attrib["CardID"]
