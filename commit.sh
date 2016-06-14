@@ -141,6 +141,13 @@ function _update-hsproto() {
 	cp -rf "$dir"/* "$REPO"
 }
 
+function _commit-all() {
+	_init-repo "$1"
+	for BUILD in "${!patches[@]}"; do
+		_commit "$1" "$BUILD"
+	done
+}
+
 
 if [[ ! -z "$1" ]]; then
 	_commit hsdata $1
@@ -149,22 +156,6 @@ if [[ ! -z "$1" ]]; then
 	exit
 fi
 
-_init-repo "hsdata"
-
-for BUILD in "${!patches[@]}"; do
-	_commit hsdata $BUILD
-done
-
-
-_init-repo "hscode"
-
-for BUILD in "${!patches[@]}"; do
-	_commit hscode $BUILD
-done
-
-
-_init-repo "hsproto"
-
-for BUILD in "${!patches[@]}"; do
-	_commit hsproto $BUILD
-done
+_commit-all hsdata
+_commit-all hscode
+_commit-all hsproto
