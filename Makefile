@@ -11,7 +11,7 @@ PROTOS_GO_DIR := $(BUILD_DIR)/go-protos
 DECOMPILER_BIN := mono $(BASE_DIR)/decompiler/build/decompile.exe
 EXTRACT_MPQ_BIN := $(BASE_DIR)/extract_mpq.py
 PROCESS_CARDXML_BIN := $(BASE_DIR)/process_cardxml.py
-PROTO_EXTRACTOR_BIN := $(BASE_DIR)/../csharp-proto-extractor/bin/Debug/csharp-proto-extractor.exe
+PROTO_EXTRACTOR_BIN := $(BASE_DIR)/../proto-extractor/bin/Debug/proto-extractor.exe
 
 .SUFFIXES:
 .PHONY: all extract process decompile clean
