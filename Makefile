@@ -30,7 +30,7 @@ process:
 
 decompile:
 	@cd $(BASE_DIR)/decompiler && $(MAKE)
-	$(MAKE) -f $(MAKEFILE) -B $(shell find $(EXTRACTED_DIR) -name "Assembly-CSharp*.dll" -type f)
+	$(MAKE) -f $(MAKEFILE) -B $(shell find -L $(EXTRACTED_DIR) -name "Assembly-CSharp*.dll" -type f)
 
 %/Assembly-CSharp.dll:
 	$(eval buildnum := $(notdir $(realpath $(dir $@)/../..)))
@@ -50,8 +50,8 @@ $(PROCESSED_DIR)/%/: $(EXTRACTED_DIR)/%/
 $(EXTRACTED_DIR)/%/:
 	$(eval buildnum := $(notdir $(patsubst %/,%,$@)))
 	$(eval outdir := $(PROCESSED_DIR)/$(buildnum))
-	$(eval bundles := $(shell find $@/Data -name '*.unity3d' -type f))
-	$(eval DBF := $(shell find $@ -name CARD.xml -type f))
+	$(eval bundles := $(shell find -L $@/Data -name '*.unity3d' -type f))
+	$(eval DBF := $(shell find -L $@ -name CARD.xml -type f))
 	@mkdir -p $(outdir)
 	@if [ -z "$(DBF)" ]; then \
 		$(PROCESS_CARDXML_BIN) -o $(outdir)/CardDefs.xml $(bundles); \
