@@ -267,18 +267,8 @@ def reverse_texture_path(path):
 	return os.path.splitext(os.path.basename(path))[0]
 
 
-def main():
-	p = ArgumentParser()
-	p.add_argument("bundles", nargs="+", type=FileType("rb"))
-	p.add_argument("-o", "--outfile", nargs=1, type=FileType("wb"))
-	p.add_argument("--dbf", nargs="?", type=FileType("r"))
-	args = p.parse_args(sys.argv[1:])
-
-	build = detect_build(args.bundles[0].name)
-
-	carddefs = {}
-	entities = {}
-	textures = {}
+def parse_bundles(files):
+	carddefs, entities, textures = {}, {}, {}
 	whitelist = [
 		"cards.unity3d",
 		"cards0.unity3d",
@@ -287,7 +277,7 @@ def main():
 		"cardxml0.unity3d",
 	]
 
-	for f in args.bundles:
+	for f in files:
 		if os.path.basename(f.name) not in whitelist:
 			f.close()
 			continue
@@ -329,6 +319,20 @@ def main():
 					texture = reverse_texture_path(d.get("m_PortraitTexturePath", ""))
 				if texture:
 					textures[cardid] = texture
+
+	return carddefs, entities, textures
+
+
+def main():
+	p = ArgumentParser()
+	p.add_argument("files", nargs="+", type=FileType("rb"))
+	p.add_argument("-o", "--outfile", nargs=1, type=FileType("wb"))
+	p.add_argument("--dbf", nargs="?", type=FileType("r"))
+	args = p.parse_args(sys.argv[1:])
+
+	build = detect_build(args.files[0].name)
+
+	carddefs, entities, textures = parse_bundles(args.files)
 
 	if carddefs:
 		xml = merge_locale_assets(carddefs)
