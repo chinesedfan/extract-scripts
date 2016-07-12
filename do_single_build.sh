@@ -1,3 +1,4 @@
+#!/bin/bash
 BASEDIR="$(readlink -f $(dirname $0))"
 EXTRACTED_DIR="$BASEDIR/build/extracted"
 PROCESSED_DIR="$BASEDIR/build/processed"
