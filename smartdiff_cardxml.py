@@ -132,9 +132,9 @@ def print_report(old_path, new_path):
 				added, removed = diff["entourage"]
 				print("  - UPDATED ENTOURAGE:")
 				if added:
-					print("    * ADDED: %s" % (", ".join(repr(other[id]) for id in added)))
+					print("    * ADDED: %s" % (", ".join(repr(other.get(id, id)) for id in added)))
 				if removed:
-					print("    * REMOVED: %s" % (", ".join(repr(first[id]) for id in removed)))
+					print("    * REMOVED: %s" % (", ".join(repr(first.get(id, id)) for id in removed)))
 		print()
 
 	new_tags = get_new_values("tags", first, other)
