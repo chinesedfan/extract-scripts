@@ -329,11 +329,19 @@ def main():
 	p.add_argument("-o", "--outfile", nargs=1, type=FileType("wb"))
 	p.add_argument("--dbf", nargs="?", type=FileType("r"))
 	p.add_argument("--build", type=int, default=None)
+	p.add_argument("--raw", action="store_true")
 	args = p.parse_args(sys.argv[1:])
 
 	build = args.build or detect_build(args.files[0].name)
 
-	carddefs, entities, textures = parse_bundles(args.files)
+	if args.raw:
+		carddefs = {}
+		for f in args.files:
+			name = os.path.splitext(os.path.basename(f.name))[0]
+			carddefs[name] = ElementTree.fromstring(f.read())
+			entities, textures = {}, {}
+	else:
+		carddefs, entities, textures = parse_bundles(args.files)
 
 	if carddefs:
 		xml = merge_locale_assets(carddefs)
