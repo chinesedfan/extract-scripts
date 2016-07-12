@@ -114,7 +114,7 @@ function _commit() {
 
 	$GIT add "$REPO" &>/dev/null
 	$GIT commit -am "Update to patch $patch.$BUILD" &>/dev/null
-	$GIT tag -am "Patch $patch.$BUILD" $BUILD
+	$GIT tag -fam "Patch $patch.$BUILD" $BUILD
 }
 
 function _push() {
