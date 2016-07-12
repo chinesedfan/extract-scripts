@@ -328,9 +328,10 @@ def main():
 	p.add_argument("files", nargs="+", type=FileType("rb"))
 	p.add_argument("-o", "--outfile", nargs=1, type=FileType("wb"))
 	p.add_argument("--dbf", nargs="?", type=FileType("r"))
+	p.add_argument("--build", type=int, default=None)
 	args = p.parse_args(sys.argv[1:])
 
-	build = detect_build(args.files[0].name)
+	build = args.build or detect_build(args.files[0].name)
 
 	carddefs, entities, textures = parse_bundles(args.files)
 
