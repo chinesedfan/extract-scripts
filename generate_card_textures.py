@@ -12,21 +12,26 @@ def handle_asset(asset, textures, cards):
 			for entry in d["m_Container"]:
 				path = entry["first"].lower()
 				asset = entry["second"]["asset"]
+				if not path.startswith("final/"):
+					path = "final/" + path
 				if not path.startswith("final/assets"):
 					continue
 				textures[path] = asset
 
-
-def handle_cards_asset(asset, cards):
-	for obj in asset.objects.values():
-		if obj.type == "GameObject":
+		elif obj.type == "GameObject":
 			d = obj.read()
 			cardid = d.name
 			if cardid in ("CardDefTemplate", "HiddenCard"):
 				# not a real card
 				cards[cardid] = ""
 				continue
+			if len(d.component) != 2:
+				# Not a CardDef
+				continue
 			carddef = d.component[1]["second"].resolve()
+			if not isinstance(carddef, dict) or "m_PortraitTexturePath" not in carddef:
+				# Not a CardDef
+				continue
 			path = carddef["m_PortraitTexturePath"]
 			if path:
 				path = "final/" + path
@@ -44,11 +49,8 @@ def extract_info(files):
 			bundle = unitypack.load(f, env)
 
 		for asset in bundle.assets:
-			print("Parsing " % (asset.name))
-			if asset.name.startswith("CAB-cards"):
-				handle_cards_asset(asset, cards)
-			else:
-				handle_asset(asset, textures, cards)
+			print("Parsing %r" % (asset.name))
+			handle_asset(asset, textures, cards)
 
 	return cards, textures
 
