@@ -33,6 +33,26 @@ def handle_cards_asset(asset, cards):
 			cards[cardid] = path.lower()
 
 
+def extract_info(files):
+	cards = {}
+	textures = {}
+	env = unitypack.UnityEnvironment()
+
+	for file in files:
+		print("Reading %r" % (file))
+		with open(file, "rb") as f:
+			bundle = unitypack.load(f, env)
+
+		for asset in bundle.assets:
+			print("Parsing " % (asset.name))
+			if asset.name.startswith("CAB-cards"):
+				handle_cards_asset(asset, cards)
+			else:
+				handle_asset(asset, textures, cards)
+
+	return cards, textures
+
+
 def main():
 	p = ArgumentParser()
 	p.add_argument("--outdir", nargs="?", default="")
@@ -40,21 +60,7 @@ def main():
 	p.add_argument("files", nargs="+")
 	args = p.parse_args(sys.argv[1:])
 
-	textures = {}
-	cards = {}
-
-	env = unitypack.UnityEnvironment()
-
-	for file in args.files:
-		with open(file, "rb") as f:
-			bundle = unitypack.load(f, env)
-
-		for asset in bundle.assets:
-			if asset.name.startswith("CAB-cards"):
-				handle_cards_asset(asset, cards)
-			else:
-				handle_asset(asset, textures, cards)
-
+	cards, textures = extract_info(args.files)
 	print("Found %i cards, %i textures including %i unique in use." % (
 		len(cards), len(textures), len(set(cards.values()))
 	))
