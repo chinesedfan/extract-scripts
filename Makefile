@@ -35,12 +35,12 @@ decompile:
 %/Assembly-CSharp.dll:
 	$(eval buildnum := $(notdir $(realpath $(dir $@)/../..)))
 	$(DECOMPILER_BIN) $@ $(DECOMPILED_DIR)/$(buildnum)
-	$(PROTO_EXTRACTOR_BIN) -o $(PROTOS_DIR)/$(buildnum) -g $(PROTOS_GO_DIR)/$(buildnum) $@
+	@# $(PROTO_EXTRACTOR_BIN) -o $(PROTOS_DIR)/$(buildnum) -g $(PROTOS_GO_DIR)/$(buildnum) $@
 
 %/Assembly-CSharp-firstpass.dll:
 	$(eval buildnum := $(notdir $(realpath $(dir $@)/../..)))
 	$(DECOMPILER_BIN) $@ $(DECOMPILED_DIR)/$(buildnum)
-	$(PROTO_EXTRACTOR_BIN) -o $(PROTOS_DIR)/$(buildnum) -g $(PROTOS_GO_DIR)/$(buildnum) $@
+	@# $(PROTO_EXTRACTOR_BIN) -o $(PROTOS_DIR)/$(buildnum) -g $(PROTOS_GO_DIR)/$(buildnum) $@
 
 clean:
 	test -d $(BUILD_DIR) && rm -rf $(BUILD_DIR)

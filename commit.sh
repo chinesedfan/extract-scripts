@@ -154,10 +154,10 @@ function _commit-all() {
 if [[ ! -z "$1" ]]; then
 	_commit hsdata $1
 	_commit hscode $1
-	_commit hsproto $1
+	# _commit hsproto $1
 	exit
 fi
 
 _commit-all hsdata
 _commit-all hscode
-_commit-all hsproto
+# _commit-all hsproto
