@@ -1,4 +1,7 @@
 #!/bin/bash
+
+set -e
+
 BASEDIR="$(readlink -f $(dirname $0))"
 EXTRACTED_DIR="$BASEDIR/build/extracted"
 PROCESSED_DIR="$BASEDIR/build/processed"
@@ -11,9 +14,7 @@ fi
 
 BUILD=$1
 
-make -B \
+make --directory="$BASEDIR" -B \
 	"$EXTRACTED_DIR/$BUILD/" \
 	"$EXTRACTED_DIR/$BUILD/Hearthstone_Data/Managed/Assembly-CSharp.dll" \
 	"$EXTRACTED_DIR/$BUILD/Hearthstone_Data/Managed/Assembly-CSharp-firstpass.dll"
-
-./commit.sh $BUILD
