@@ -107,6 +107,7 @@ function _commit() {
 	date="$(printf "${patches[$BUILD]}" | cut -f2 -d " ") 12:00:00 +0000"
 	dir="${directories[$PROJECT]}/$BUILD"
 	export GIT_AUTHOR_DATE="$date"
+	export GIT_COMMITTER_DATE="$date"
 
 	[[ -d "$dir" ]] || return
 	echo "Committing $PROJECT for $patch.$BUILD"
