@@ -1,7 +1,7 @@
 #!/bin/bash
 BASEDIR="$(readlink -f $(dirname $0))"
 BUILDDIR="$BASEDIR/build"
-GH="git@github.com:HearthSim"
+GH="git@gitlab.com:HearthSim"
 
 export GIT_AUTHOR_NAME="HearthSim Bot"
 export GIT_AUTHOR_EMAIL="commits@hearthsim.info"
@@ -74,9 +74,9 @@ declare -A directories=(
 )
 
 declare -A remotes=(
-	["hscode"]="$GH/hs-code.git"
-	["hsdata"]="$GH/hs-data.git"
-	["hsproto"]="$GH/hs-proto.git"
+	["hscode"]="$GH/hscode.git"
+	["hsdata"]="$GH/hsdata.git"
+	["hsproto"]="$GH/hsproto.git"
 )
 
 
