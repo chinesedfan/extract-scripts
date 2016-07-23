@@ -1,7 +1,9 @@
 #!/bin/bash
 BASEDIR="$(readlink -f $(dirname $0))"
 BUILDDIR="$BASEDIR/build"
-GH="git@gitlab.com:HearthSim"
+GH="git@github.com:HearthSim"
+GL="git@gitlab.com:HearthSim"
+
 
 export GIT_AUTHOR_NAME="HearthSim Bot"
 export GIT_AUTHOR_EMAIL="commits@hearthsim.info"
@@ -73,25 +75,19 @@ declare -A directories=(
 	["hsproto"]="$BUILDDIR/protos"
 )
 
-declare -A remotes=(
-	["hscode"]="$GH/hscode.git"
-	["hsdata"]="$GH/hsdata.git"
-	["hsproto"]="$GH/hsproto.git"
-)
-
 
 function _init-repo() {
 	PROJECT="$1"
 	REPO="$BASEDIR/$PROJECT.git"
 	GIT="git -C $REPO"
 	README="$BASEDIR/README-$PROJECT.md"
-	REMOTE="${remotes[$PROJECT]}"
 
 	echo "Initializing $PROJECT"
 	rm -rf "$REPO"
 	git init "$REPO"
 	cp "$README" "$REPO/README.md"
-	$GIT remote add origin "$REMOTE"
+	$GIT remote add origin "$GL/$PROJECT.git"
+	$GIT remote set-url --add origin "$GH/$PROJECT.git"
 	$GIT add README.md
 	$GIT commit -m "Initial commit"
 	$GIT config branch.master.remote origin
