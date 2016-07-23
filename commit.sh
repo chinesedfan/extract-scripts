@@ -82,6 +82,10 @@ function _init-repo() {
 	GIT="git -C $REPO"
 	README="$BASEDIR/README-$PROJECT.md"
 
+	# Initial commit date
+	export GIT_AUTHOR_DATE="2013-03-22 12:00:00 +0000"
+	export GIT_COMMITTER_DATE="$GIT_AUTHOR_DATE"
+
 	echo "Initializing $PROJECT"
 	rm -rf "$REPO"
 	git init "$REPO"
