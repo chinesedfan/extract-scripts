@@ -68,7 +68,7 @@ for repo in $repos; do
 done
 
 if ! grep -q "$BUILD" "$COMMIT_BIN"; then
-	>&2 echo "$BUILD is not present in $COMMIT_SCRIPT. Aborting."
+	>&2 echo "$BUILD is not present in $COMMIT_BIN. Aborting."
 	exit 3
 fi
 
