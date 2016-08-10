@@ -10,10 +10,6 @@ from hearthstone.dbf import Dbf
 from hearthstone.enums import GameTag
 
 
-UNTRANSLATED_ENUMIDS = (
-	"342",  # ArtistName
-)
-
 MISSING_HERO_POWERS = {
 	"BRM_027h": "BRM_027p",
 	"EX1_323h": "EX1_tk33",
@@ -197,7 +193,7 @@ def merge_card_assets(cards, build):
 	for id, entity in cards.items():
 		# Fix the locale tags
 		for tag in entity.findall("Tag[@type='String']"):
-			if tag.attrib["enumID"] in UNTRANSLATED_ENUMIDS:
+			if int(tag.attrib["enumID"]) == GameTag.ARTISTNAME:
 				# "untranslate" the string
 				tag.text = tag.find("enUS").text
 				for lt in tag:
@@ -230,7 +226,7 @@ def _merge_strings(base, extra, locale):
 
 def _prepare_strings(xml, locale):
 	for tag in xml.findall("Tag[@type='String']"):
-		if tag.attrib["enumID"] in UNTRANSLATED_ENUMIDS:
+		if int(tag.attrib["enumID"]) == GameTag.ARTISTNAME:
 			continue
 		newtag = _make_locale_tag(tag.text, locale)
 		tag.text = ""
