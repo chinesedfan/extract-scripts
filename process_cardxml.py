@@ -140,7 +140,7 @@ def process_dbf(dbf, xml):
 		assert k not in hero_powers
 		hero_powers[k] = v
 
-	return hero_powers
+	return hero_powers, {v: k for k, v in db.items()}
 
 
 def clean_entourage_ids(xml, guids):
@@ -362,9 +362,9 @@ def main():
 		xml = merge_card_assets(entities, build)
 
 	if args.dbf:
-		hero_powers = process_dbf(args.dbf, xml)
+		hero_powers, dbf_ids = process_dbf(args.dbf, xml)
 	else:
-		hero_powers = {}
+		hero_powers, dbf_ids = {}, {}
 
 	if build < 6024:
 		SHROUDED = "Can't be targeted by Spells or Hero Powers."
@@ -375,8 +375,13 @@ def main():
 
 	for entity in xml.findall("Entity"):
 		id = entity.attrib["CardID"]
+
 		description = entity.find("Tag[@enumID='184']/enUS")
 		description = description.text if description is not None else ""
+
+		# Add the dbf id
+		if id in dbf_ids:
+			entity.attrib["ID"] = str(dbf_ids[id])
 
 		# Clean up MasterPower whitespace
 		power = entity.find("MasterPower")
