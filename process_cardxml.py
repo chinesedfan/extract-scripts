@@ -76,6 +76,14 @@ TAGS = {
 }
 
 
+def print_info(*args):
+	print("[INFO]", *args, file=sys.stderr)
+
+
+def print_warn(*args):
+	print("[WARN]", *args, file=sys.stderr)
+
+
 def pretty_xml(xml):
 	ret = ElementTree.tostring(xml, encoding="utf-8")
 	ret = minidom.parseString(ret).toprettyxml(indent="\t", encoding="utf-8")
@@ -141,7 +149,7 @@ def clean_entourage_ids(xml, guids):
 
 
 def make_carddefs(entities):
-	print("Processing %i entities" % (len(entities)))
+	print_info("Processing %i entities" % (len(entities)))
 	root = ElementTree.Element("CardDefs")
 	ids = sorted(entities.keys(), key=lambda i: i.lower())
 	for id in ids:
@@ -152,7 +160,7 @@ def make_carddefs(entities):
 
 
 def merge_card_assets(cards, build):
-	print("Performing card merge on %i items" % (len(cards)))
+	print_info("Performing card merge on %i items" % (len(cards)))
 
 	def _clean_tag(tag):
 		locale_elems = {e.tag: e for e in tag}
@@ -222,7 +230,7 @@ def _prepare_strings(xml, locale):
 
 
 def merge_locale_assets(data):
-	print("Performing locale merge")
+	print_info("Performing locale merge")
 	entities = {}
 
 	# Ensure we process enUS first
@@ -233,7 +241,7 @@ def merge_locale_assets(data):
 		xml = data[locale]
 		for entity in xml.findall("Entity"):
 			id = entity.attrib["CardID"]
-			# print("Merging card %r" % (id))
+			# print_info("Merging card %r" % (id))
 			if id not in entities:
 				_prepare_strings(entity, locale)
 				entities[id] = entity
@@ -250,7 +258,7 @@ def detect_build(path):
 def guess_overload(text):
 	sre = re.search(r"Overload[^(]+\((\d+)\)", text)
 	if sre is None:
-		print("WARNING: Could not guess overload in %r" % (text))
+		print_warn("Could not guess overload in %r" % (text))
 		return 0
 	return int(sre.groups()[0])
 
@@ -258,7 +266,7 @@ def guess_overload(text):
 def guess_spellpower(text):
 	sre = re.search(r"Spell (?:Power|Damage)(?:</b>)? \+(\d+)", text)
 	if sre is None:
-		print("WARNING: Could not guess spell power in %r" % (text))
+		print_warn("Could not guess spell power in %r" % (text))
 		return 0
 	return int(sre.groups()[0])
 
@@ -283,7 +291,7 @@ def parse_bundles(files):
 			continue
 		bundle = unitypack.load(f)
 		asset = bundle.assets[0]
-		print("Processing %r" % (asset))
+		print_info("Processing %r" % (asset))
 		for obj in asset.objects.values():
 			if obj.type == "TextAsset":
 				d = obj.read()
@@ -304,7 +312,7 @@ def parse_bundles(files):
 					# make sure it's actually a card.
 					continue
 				if d["m_GameObject"] is None:
-					print("Missing m_GameObject for %r" % (obj))
+					print_warn("Missing m_GameObject for %r" % (obj))
 					continue
 				cardid = d["m_GameObject"].resolve().name
 				if "m_PortraitTexture" in d:
@@ -350,7 +358,7 @@ def main():
 
 	hero_powers = {}
 	if args.dbf:
-		print("Processing DBF %r" % (args.dbf.name))
+		print_info("Processing DBF %r" % (args.dbf.name))
 		dbfxml = ElementTree.parse(args.dbf)
 		guids, hero_powers = load_dbf(dbfxml)
 
@@ -406,7 +414,7 @@ def main():
 
 	xml.attrib["build"] = str(build)
 
-	print("Writing to %r" % (args.outfile[0].name))
+	print_info("Writing to %r" % (args.outfile[0].name))
 	args.outfile[0].write(pretty_xml(xml))
 
 
