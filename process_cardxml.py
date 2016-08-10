@@ -393,7 +393,7 @@ def main():
 			spellpower.attrib["type"] = "Int"
 
 		if SHROUDED in description:
-			set_tag(entity, GameTag.CANT_BE_TARGETED_BY_ABILITIES, 1, type="Bool")
+			set_tag(entity, GameTag.CANT_BE_TARGETED_BY_SPELLS, 1, type="Bool")
 			set_tag(entity, GameTag.CANT_BE_TARGETED_BY_HERO_POWERS, 1, type="Bool")
 
 		if "Can't attack." in description or "Can't Attack." in description:
