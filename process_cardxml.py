@@ -6,6 +6,7 @@ import unitypack
 from argparse import ArgumentParser, FileType
 from xml.dom import minidom
 from xml.etree import ElementTree
+from hearthstone.dbf import Dbf
 from hearthstone.enums import GameTag
 
 
@@ -111,31 +112,39 @@ def set_tag(entity, tag, value, type):
 	entity.append(e)
 
 
-def load_dbf(dbfxml):
+def process_dbf(dbf, xml):
+	print_info("Processing DBF %r" % (dbf))
+	dbf = Dbf.load(dbf)
+
 	db = {}
 	guids = {}
 	hero_powers = {}
-	for record in dbfxml.findall("Record"):
-		id = int(record.find("./Field[@column='ID']").text)
-		long_guid = record.find("./Field[@column='LONG_GUID']")
-		mini_guid = record.find("./Field[@column='NOTE_MINI_GUID']").text
-		hero_power_id = int(record.find("./Field[@column='HERO_POWER_ID']").text or 0)
+
+	for record in dbf.records:
+		id = record["ID"]
+		mini_guid = record["NOTE_MINI_GUID"]
 		db[id] = mini_guid
-		if long_guid is not None:
-			long_guid = long_guid.text
+
+		long_guid = record.get("LONG_GUID")
+		if long_guid:
 			guids[long_guid] = mini_guid
+
+		hero_power_id = record["HERO_POWER_ID"]
 		if hero_power_id:
 			hero_powers[mini_guid] = hero_power_id
 
+	clean_entourage_ids(xml, guids)
+
+	# Replace numeric id by card id
 	for k, v in hero_powers.items():
 		hero_powers[k] = db[v]
 
+	# Some hero powers are missing from the DBF...
 	for k, v in MISSING_HERO_POWERS.items():
-		# Some hero powers are missing from the DBF...
 		assert k not in hero_powers
 		hero_powers[k] = v
 
-	return guids, hero_powers
+	return hero_powers
 
 
 def clean_entourage_ids(xml, guids):
@@ -335,7 +344,7 @@ def main():
 	p = ArgumentParser()
 	p.add_argument("files", nargs="+", type=FileType("rb"))
 	p.add_argument("-o", "--outfile", nargs="?", type=FileType("wb"))
-	p.add_argument("--dbf", nargs="?", type=FileType("r"))
+	p.add_argument("--dbf", nargs="?", type=str)
 	p.add_argument("--build", type=int, default=None)
 	p.add_argument("--raw", action="store_true")
 	args = p.parse_args(sys.argv[1:])
@@ -356,13 +365,10 @@ def main():
 	else:
 		xml = merge_card_assets(entities, build)
 
-	hero_powers = {}
 	if args.dbf:
-		print_info("Processing DBF %r" % (args.dbf.name))
-		dbfxml = ElementTree.parse(args.dbf)
-		guids, hero_powers = load_dbf(dbfxml)
-
-		clean_entourage_ids(xml, guids)
+		hero_powers = process_dbf(args.dbf, xml)
+	else:
+		hero_powers = {}
 
 	if build < 6024:
 		SHROUDED = "Can't be targeted by Spells or Hero Powers."
