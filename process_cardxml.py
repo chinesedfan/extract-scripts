@@ -334,7 +334,7 @@ def parse_bundles(files):
 def main():
 	p = ArgumentParser()
 	p.add_argument("files", nargs="+", type=FileType("rb"))
-	p.add_argument("-o", "--outfile", nargs=1, type=FileType("wb"))
+	p.add_argument("-o", "--outfile", nargs="?", type=FileType("wb"))
 	p.add_argument("--dbf", nargs="?", type=FileType("r"))
 	p.add_argument("--build", type=int, default=None)
 	p.add_argument("--raw", action="store_true")
@@ -414,8 +414,11 @@ def main():
 
 	xml.attrib["build"] = str(build)
 
-	print_info("Writing to %r" % (args.outfile[0].name))
-	args.outfile[0].write(pretty_xml(xml))
+	if args.outfile:
+		print_info("Writing to %r" % (args.outfile.name))
+		args.outfile.write(pretty_xml(xml))
+	else:
+		print(pretty_xml(xml).decode("utf-8"))
 
 
 if __name__ == "__main__":
