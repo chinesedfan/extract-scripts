@@ -120,7 +120,7 @@ git -C "$HSDATA_GIT" show "$BUILD:CardDefs.xml" > /tmp/new.xml
 git -C "$HSDATA_GIT" show "$BUILD~:CardDefs.xml" > /tmp/old.xml
 
 echo "Generating smartdiff"
-"$SMARTDIFF_BIN" "/tmp/new.xml" "/tmp/old.xml" > "$SMARTDIFF_OUT"
+"$SMARTDIFF_BIN" "/tmp/old.xml" "/tmp/new.xml" > "$SMARTDIFF_OUT"
 echo "Generated smartdiff in $SMARTDIFF_OUT"
 rm /tmp/new.xml /tmp/old.xml
 
