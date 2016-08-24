@@ -63,7 +63,7 @@ def extract_info(files):
 	return cards, textures
 
 
-def save_image(texture, name, prefix, args):
+def save_image(image, name, prefix, args):
 	dirname = os.path.join(args.outdir, prefix)
 	if not os.path.exists(dirname):
 		os.makedirs(dirname)
@@ -72,12 +72,80 @@ def save_image(texture, name, prefix, args):
 		return
 
 	print("%r -> %r" % (name, path))
-	texture.image.save(path)
+	image.save(path)
 
 
-def process_tile_texture(texture, tile):
-	print(tile)
-	raise NotImplementedError
+# Deck tile generation
+TEX_COORDS = [(0.0, 0.3856), (1.0, 0.6144)]
+OUT_DIM = 256
+OUT_WIDTH = round(TEX_COORDS[1][0] * OUT_DIM - TEX_COORDS[0][0] * OUT_DIM)
+OUT_HEIGHT = round(TEX_COORDS[1][1] * OUT_DIM - TEX_COORDS[0][1] * OUT_DIM)
+
+
+def get_rect(ux, uy, usx, usy, sx, sy, ss, tex_dim=512):
+	# calc the coords
+	tl_x = ((TEX_COORDS[0][0] + sx) * ss) * usx + ux
+	tl_y = ((TEX_COORDS[0][1] + sy) * ss) * usy + uy
+	br_x = ((TEX_COORDS[1][0] + sx) * ss) * usx + ux
+	br_y = ((TEX_COORDS[1][1] + sy) * ss) * usy + uy
+
+	# adjust if x coords cross-over
+	horiz_delta = tl_x - br_x
+	if horiz_delta > 0:
+		tl_x -= horiz_delta
+		br_x += horiz_delta
+
+	# get the bar rectangle at tex_dim size
+	x = round(tl_x * tex_dim)
+	y = round(tl_y * tex_dim)
+	width = round(abs((br_x - tl_x) * tex_dim))
+	height = round(abs((br_y - tl_y) * tex_dim))
+
+	# adjust x and y, so that texture is "visible"
+	x = (x + width) % tex_dim - width
+	y = (y + height) % tex_dim - height
+
+	# ??? to cater for some special cases
+	min_visible = tex_dim / 4
+	while x + width < min_visible:
+		x += tex_dim
+	while y + height < 0:
+		y += tex_dim
+
+	# ensure wrap around is used
+	if x < 0:
+		x += tex_dim
+
+	return (x, y, width, height)
+
+
+def generate_tile_image(img, tile):
+	from PIL import Image, ImageOps
+	# tile the image horizontally (x2 is enough),
+	# some cards need to wrap around to create a bar (e.g. Muster for Battle),
+	# also discard alpha channel (e.g. Soulfire, Mortal Coil)
+	tiled = Image.new("RGB", (img.width * 2, img.height))
+	tiled.paste(img, (0, 0))
+	tiled.paste(img, (img.width, 0))
+
+	x, y, width, height = get_rect(
+		tile["m_TexEnvs"]["_MainTex"]["m_Offset"]["x"],
+		tile["m_TexEnvs"]["_MainTex"]["m_Offset"]["y"],
+		tile["m_TexEnvs"]["_MainTex"]["m_Scale"]["x"],
+		tile["m_TexEnvs"]["_MainTex"]["m_Scale"]["y"],
+		tile["m_Floats"].get("_OffsetX", 0.0),
+		tile["m_Floats"].get("_OffsetY", 0.0),
+		tile["m_Floats"].get("_Scale", 1.0),
+		img.width
+	)
+
+	bar = tiled.crop((x, y, x + width, y + height))
+	bar = ImageOps.flip(bar)
+	# negative x scale means horizontal flip
+	if tile["m_TexEnvs"]["_MainTex"]["m_Scale"]["x"] < 0:
+		bar = ImageOps.mirror(bar)
+
+	return bar.resize((OUT_WIDTH, OUT_HEIGHT), Image.LANCZOS)
 
 
 def main():
@@ -109,10 +177,10 @@ def main():
 		pptr = textures[path]
 		texture = pptr.resolve()
 
-		save_image(texture, id, by_id_dir, args)
+		save_image(texture.image, id, by_id_dir, args)
 
 		if values["tile"]:
-			tile_texture = process_tile_texture(texture, values["tile"])
+			tile_texture = generate_tile_image(texture.image, values["tile"])
 			save_image(tile_texture, id, tiles_dir, args)
 
 
