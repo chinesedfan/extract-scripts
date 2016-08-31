@@ -154,6 +154,7 @@ def main():
 	p = ArgumentParser()
 	p.add_argument("--outdir", nargs="?", default="")
 	p.add_argument("--skip-existing", action="store_true")
+	p.add_argument("--only", nargs="?", help="Only extract these IDs (comma-separated)")
 	p.add_argument("files", nargs="+")
 	args = p.parse_args(sys.argv[1:])
 
@@ -166,8 +167,12 @@ def main():
 	orig_dir = "orig"
 	thumb_sizes = (256, 512)
 	tiles_dir = "tiles"
+	filter_ids = args.only.split(",")
 
 	for id, values in cards.items():
+		if filter_ids and id not in filter_ids:
+			continue
+
 		path = values["path"]
 		print("Parsing %r (%r)" % (id, path))
 		if not path:
