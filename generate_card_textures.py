@@ -4,6 +4,7 @@ import sys
 import unitypack
 from argparse import ArgumentParser
 from unitypack.environment import UnityEnvironment
+from PIL import Image, ImageOps
 
 
 def handle_asset(asset, textures, cards):
@@ -63,18 +64,6 @@ def extract_info(files):
 	return cards, textures
 
 
-def save_image(image, name, prefix, args):
-	dirname = os.path.join(args.outdir, prefix)
-	if not os.path.exists(dirname):
-		os.makedirs(dirname)
-	path = os.path.join(dirname, name + ".png")
-	if args.skip_existing and os.path.exists(path):
-		return
-
-	print("%r -> %r" % (name, path))
-	image.save(path)
-
-
 # Deck tile generation
 TEX_COORDS = [(0.0, 0.3856), (1.0, 0.6144)]
 OUT_DIM = 256
@@ -120,7 +109,6 @@ def get_rect(ux, uy, usx, usy, sx, sy, ss, tex_dim=512):
 
 
 def generate_tile_image(img, tile):
-	from PIL import Image, ImageOps
 	# tile the image horizontally (x2 is enough),
 	# some cards need to wrap around to create a bar (e.g. Muster for Battle),
 	# also discard alpha channel (e.g. Soulfire, Mortal Coil)
@@ -148,6 +136,20 @@ def generate_tile_image(img, tile):
 	return bar.resize((OUT_WIDTH, OUT_HEIGHT), Image.LANCZOS)
 
 
+def get_dir(basedir, dirname):
+	ret = os.path.join(basedir, dirname)
+	if not os.path.exists(ret):
+		os.makedirs(ret)
+	return ret
+
+
+def get_filename(basedir, dirname, name, ext=".png"):
+	dirname = get_dir(basedir, dirname)
+	filename = name + ext
+	path = os.path.join(dirname, filename)
+	return path, os.path.exists(path)
+
+
 def main():
 	p = ArgumentParser()
 	p.add_argument("--outdir", nargs="?", default="")
@@ -161,11 +163,13 @@ def main():
 		len(cards), len(textures), len(set(paths))
 	))
 
-	by_id_dir = "by-id"
+	orig_dir = "orig"
+	thumb_sizes = (256, 512)
 	tiles_dir = "tiles"
 
 	for id, values in cards.items():
 		path = values["path"]
+		print("Parsing %r (%r)" % (id, path))
 		if not path:
 			print("%r does not have a texture" % (id))
 			continue
@@ -176,12 +180,30 @@ def main():
 
 		pptr = textures[path]
 		texture = pptr.resolve()
+		flipped = None
 
-		save_image(texture.image, id, by_id_dir, args)
+		filename, exists = get_filename(args.outdir, orig_dir, id)
+		if not (args.skip_existing and exists):
+			print("-> %r" % (filename))
+			flipped = ImageOps.flip(texture.image).convert("RGB")
+			flipped.save(filename)
 
 		if values["tile"]:
-			tile_texture = generate_tile_image(texture.image, values["tile"])
-			save_image(tile_texture, id, tiles_dir, args)
+			filename, exists = get_filename(args.outdir, tiles_dir, id)
+			if not (args.skip_existing and exists):
+				tile_texture = generate_tile_image(texture.image, values["tile"])
+				print("-> %r" % (filename))
+				tile_texture.save(filename)
+
+		for sz in thumb_sizes:
+			thumb_dir = "%ix" % (sz)
+			filename, exists = get_filename(args.outdir, thumb_dir, id, ext=".jpg")
+			if not (args.skip_existing and exists):
+				if not flipped:
+					flipped = ImageOps.flip(texture.image).convert("RGB")
+				thumb_texture = flipped.resize((sz, sz))
+				print("-> %r" % (filename))
+				thumb_texture.save(filename)
 
 
 if __name__ == "__main__":
