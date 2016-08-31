@@ -135,20 +135,6 @@ fi
 
 echo "Extracting card textures"
 "$EXTRACT_SCRIPTS/generate_card_textures.py" "$HSBUILDDIR/Data/Win/"{card,shared}*.unity3d --outdir="$CARDARTDIR" --skip-existing
-# TODO: now flip textures and convert to jpg
-
-echo "Post-processing card textures"
-for img in "$CARDARTDIR"/*.png; do
-	filename=${img%.*}
-	if [[ -f "$filename.jpg" ]]; then
-		# If the jpg already exists, do not regenerate it
-		continue
-	fi
-	echo "Post-processing $filename.png"
-	# NOTE: -flip is needed because the textures are upside down in unity
-	convert -flip "$filename.png" "$filename.jpg"
-done
-
 
 echo "Loading cards into the HSReplay.net database"
 
