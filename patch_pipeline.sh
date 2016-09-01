@@ -44,10 +44,6 @@ BLTE_BIN="$HOME/bin/blte.exe"
 # Autocommit script
 COMMIT_BIN="$BASEDIR/commit.sh"
 
-# manage.py from HSReplay.net
-MANAGEPY_ENV="/srv/http/hsreplay.net/virtualenv/bin/python"
-MANAGEPY_BIN="/srv/http/hsreplay.net/source/manage.py"
-
 # Card texture extraction/generation script
 TEXTUREGEN_BIN="$HEARTHSTONEJSON_GIT/generate_card_textures.py"
 
@@ -162,9 +158,5 @@ fi
 
 echo "Extracting card textures"
 "$TEXTUREGEN_BIN" "$HSBUILDDIR/Data/Win/"{card,shared}*.unity3d --outdir="$CARDARTDIR" --skip-existing
-
-echo "Loading cards into the HSReplay.net database"
-
-sudo -u www-data "$MANAGEPY_ENV" "$MANAGEPY_BIN" load_cards "$CARDDEFS_XML"
 
 echo "Build $BUILD completed"
