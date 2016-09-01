@@ -2,6 +2,7 @@
 
 set -e
 
+BASEDIR="$(readlink -f $(dirname $0))"
 BUILD="$1"
 
 isnum='^[0-9]+$'
@@ -28,41 +29,38 @@ CARDARTDIR="$DATADIR/card-art"
 # HearthstoneJSON generated files directory
 HSJSONDIR="/srv/http/api.hearthstonejson.com/html/v1/$BUILD"
 
-# extract-scripts repo directory
-EXTRACT_SCRIPTS="$HOME/projects/extract-scripts"
-
 # Symlink file for extracted data
-EXTRACT_SCRIPTS_LINKFILE="$EXTRACT_SCRIPTS/build/extracted/$BUILD"
+EXTRACTED_BUILD_DIR="$BASEDIR/build/extracted/$BUILD"
 
 # Patch downloader
 BLTE_BIN="$HOME/bin/blte.exe"
 
 # Autocommit script
-COMMIT_BIN="$EXTRACT_SCRIPTS/commit.sh"
+COMMIT_BIN="$BASEDIR/commit.sh"
 
 # manage.py from HSReplay.net
 MANAGEPY_ENV="/srv/http/hsreplay.net/virtualenv/bin/python"
 MANAGEPY_BIN="/srv/http/hsreplay.net/source/manage.py"
 
 # Card texture extraction/generation script
-TEXTUREGEN_BIN="$EXTRACT_SCRIPTS/generate_card_textures.py"
+TEXTUREGEN_BIN="$BASEDIR/generate_card_textures.py"
 
 # Smartdiff generation script
-SMARTDIFF_BIN="$EXTRACT_SCRIPTS/smartdiff_cardxml.py"
+SMARTDIFF_BIN="$BASEDIR/smartdiff_cardxml.py"
 
 # Smartdiff output file
 SMARTDIFF_OUT="$HOME/smartdiff-$BUILD.txt"
 
 # hscode/hsdata git repositories
-HSCODE_GIT="$EXTRACT_SCRIPTS/hscode.git"
-HSDATA_GIT="$EXTRACT_SCRIPTS/hsdata.git"
+HSCODE_GIT="$BASEDIR/hscode.git"
+HSDATA_GIT="$BASEDIR/hsdata.git"
 
 # CardDefs.xml path for the build
 CARDDEFS_XML="$HSDATA_GIT/CardDefs.xml"
 
 
 echo "Updating repositories"
-declare -a repos=("$EXTRACT_SCRIPTS")
+declare -a repos=("$BASEDIR")
 for repo in $repos; do
 	git -C "$repo" pull
 done
@@ -86,11 +84,11 @@ else
 fi
 
 echo "Linking build files"
-if [[ -e $EXTRACT_SCRIPTS_LINKFILE ]]; then
-	echo "$EXTRACT_SCRIPTS_LINKFILE already exists, not overwriting."
+if [[ -e $EXTRACTED_BUILD_DIR ]]; then
+	echo "$EXTRACTED_BUILD_DIR already exists, not overwriting."
 else
-	echo "Creating symlink to build in $EXTRACT_SCRIPTS_LINKFILE"
-	ln -s -v "$HSBUILDDIR" "$EXTRACT_SCRIPTS_LINKFILE"
+	echo "Creating symlink to build in $EXTRACTED_BUILD_DIR"
+	ln -s -v "$HSBUILDDIR" "$EXTRACTED_BUILD_DIR"
 fi
 
 
@@ -101,10 +99,10 @@ fi
 if ! git -C "$HSDATA_GIT" rev-parse "$BUILD" &>/dev/null; then
 	echo "Extracting and decompiling the build"
 
-	make --directory="$EXTRACT_SCRIPTS" -B \
-		"$EXTRACT_SCRIPTS_LINKFILE/" \
-		"$EXTRACT_SCRIPTS_LINKFILE/Hearthstone_Data/Managed/Assembly-CSharp.dll" \
-		"$EXTRACT_SCRIPTS_LINKFILE/Hearthstone_Data/Managed/Assembly-CSharp-firstpass.dll"
+	make --directory="$BASEDIR" -B \
+		"$EXTRACTED_BUILD_DIR/" \
+		"$EXTRACTED_BUILD_DIR/Hearthstone_Data/Managed/Assembly-CSharp.dll" \
+		"$EXTRACTED_BUILD_DIR/Hearthstone_Data/Managed/Assembly-CSharp-firstpass.dll"
 
 	echo "Generating git repositories"
 	"$COMMIT_BIN" "$BUILD"
@@ -134,7 +132,7 @@ fi
 
 
 echo "Extracting card textures"
-"$EXTRACT_SCRIPTS/generate_card_textures.py" "$HSBUILDDIR/Data/Win/"{card,shared}*.unity3d --outdir="$CARDARTDIR" --skip-existing
+"$TEXTUREGEN_BIN" "$HSBUILDDIR/Data/Win/"{card,shared}*.unity3d --outdir="$CARDARTDIR" --skip-existing
 
 echo "Loading cards into the HSReplay.net database"
 
