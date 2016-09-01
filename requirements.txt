@@ -1,0 +1,6 @@
+awscli
+hearthstone
+lz4
+# mpq
+pillow
+unitypack

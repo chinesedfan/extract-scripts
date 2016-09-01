@@ -58,6 +58,16 @@ HSDATA_GIT="$BASEDIR/hsdata.git"
 # CardDefs.xml path for the build
 CARDDEFS_XML="$HSDATA_GIT/CardDefs.xml"
 
+# Python requirements for the various scripts
+REQUIREMENTS_TXT="$BASEDIR/requirements.txt"
+
+
+if [[ -z $VIRTUAL_ENV ]]; then
+	>&2 echo "Must be run from within a virtualenv"
+else
+	pip install --upgrade pip
+	pip install -r "$REQUIREMENTS_TXT" --upgrade --no-cache-dir
+fi
 
 echo "Updating repositories"
 declare -a repos=("$BASEDIR")
