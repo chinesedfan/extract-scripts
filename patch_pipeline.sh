@@ -49,7 +49,7 @@ MANAGEPY_ENV="/srv/http/hsreplay.net/virtualenv/bin/python"
 MANAGEPY_BIN="/srv/http/hsreplay.net/source/manage.py"
 
 # Card texture extraction/generation script
-TEXTUREGEN_BIN="$BASEDIR/generate_card_textures.py"
+TEXTUREGEN_BIN="$HEARTHSTONEJSON_GIT/generate_card_textures.py"
 
 # Smartdiff generation script
 SMARTDIFF_BIN="$BASEDIR/smartdiff_cardxml.py"
