@@ -70,7 +70,16 @@ else
 fi
 
 echo "Updating repositories"
-declare -a repos=("$BASEDIR")
+declare -a repos=("$BASEDIR" "$HSDATA_GIT" "$HSCODE_GIT")
+
+if [[ ! -d "$HSDATA_GIT" ]]; then
+	git clone git@github.com:HearthSim/hsdata.git "$HSDATA_GIT"
+fi
+
+if [[ ! -d "$HSCODE_GIT" ]]; then
+	git clone git@github.com:HearthSim/hscode.git "$HSCODE_GIT"
+fi
+
 for repo in $repos; do
 	git -C "$repo" pull
 done
@@ -82,7 +91,7 @@ fi
 
 
 echo "Preparing patch directories"
-if [[ -e $HSBUILDDIR ]]; then
+if [[ -d $HSBUILDDIR ]]; then
 	echo "$HSBUILDDIR already exists... skipping download checks."
 else
 	if ! [[ -d "$NGDP_OUT" ]]; then
