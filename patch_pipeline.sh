@@ -14,6 +14,9 @@ fi
 # Base directory for large data files
 DATADIR="/mnt/home/ngdp"
 
+# Base build directory from extract-scripts
+BUILDDIR="$BASEDIR/build"
+
 # Directory storing the 'hsb' blte config
 HSBDIR="$DATADIR/hsb"
 
@@ -24,7 +27,7 @@ NGDP_OUT="$HSBDIR/out"
 HSBUILDDIR="$DATADIR/data/ngdp/hsb/$BUILD"
 
 # Directory that contains card textures
-CARDARTDIR="$DATADIR/card-art"
+CARDARTDIR="$BUILDDIR/card-art"
 
 # HearthstoneJSON git repository
 HEARTHSTONEJSON_GIT="$HOME/projects/HearthstoneJSON"
@@ -36,7 +39,7 @@ HEARTHSTONEJSON_BIN="$HEARTHSTONEJSON_GIT/generate.sh"
 HSJSONDIR="$HOME/projects/HearthstoneJSON/build/html/v1/$BUILD"
 
 # Symlink file for extracted data
-EXTRACTED_BUILD_DIR="$BASEDIR/build/extracted/$BUILD"
+EXTRACTED_BUILD_DIR="$BUILDDIR/extracted/$BUILD"
 
 # Patch downloader
 BLTE_BIN="$HOME/bin/blte.exe"
