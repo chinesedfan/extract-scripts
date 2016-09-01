@@ -26,8 +26,11 @@ HSBUILDDIR="$DATADIR/data/ngdp/hsb/$BUILD"
 # Directory that contains card textures
 CARDARTDIR="$DATADIR/card-art"
 
+# HearthstoneJSON file generator
+HEARTHSTONEJSON_BIN="$HOME/projects/HearthstoneJSON/generate.sh"
+
 # HearthstoneJSON generated files directory
-HSJSONDIR="/srv/http/api.hearthstonejson.com/html/v1/$BUILD"
+HSJSONDIR="$HOME/projects/HearthstoneJSON/build/html/v1/$BUILD"
 
 # Symlink file for extracted data
 EXTRACTED_BUILD_DIR="$BASEDIR/build/extracted/$BUILD"
@@ -146,7 +149,7 @@ echo "Updating HearthstoneJSON"
 if [[ -e $HSJSONDIR ]]; then
 	echo "HearthstoneJSON is up-to-date."
 else
-	sudo -u www-data /var/www/hearthstonejson.sh "$BUILD"
+	"$HEARTHSTONEJSON_BIN" "$BUILD"
 fi
 
 
