@@ -26,8 +26,11 @@ HSBUILDDIR="$DATADIR/data/ngdp/hsb/$BUILD"
 # Directory that contains card textures
 CARDARTDIR="$DATADIR/card-art"
 
+# HearthstoneJSON git repository
+HEARTHSTONEJSON_GIT="$HOME/projects/HearthstoneJSON"
+
 # HearthstoneJSON file generator
-HEARTHSTONEJSON_BIN="$HOME/projects/HearthstoneJSON/generate.sh"
+HEARTHSTONEJSON_BIN="$HEARTHSTONEJSON_GIT/generate.sh"
 
 # HearthstoneJSON generated files directory
 HSJSONDIR="$HOME/projects/HearthstoneJSON/build/html/v1/$BUILD"
@@ -73,7 +76,11 @@ else
 fi
 
 echo "Updating repositories"
-declare -a repos=("$BASEDIR" "$HSDATA_GIT" "$HSCODE_GIT")
+declare -a repos=("$BASEDIR" "$HEARTHSTONEJSON_GIT" "$HSDATA_GIT" "$HSCODE_GIT")
+
+if [[ ! -d "$HEARTHSTONEJSON_GIT" ]]; then
+	git clone git@github.com:HearthSim/HearthstoneJSON.git "$HEARTHSTONEJSON_GIT"
+fi
 
 if [[ ! -d "$HSDATA_GIT" ]]; then
 	git clone git@github.com:HearthSim/hsdata.git "$HSDATA_GIT"
