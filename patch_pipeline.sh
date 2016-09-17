@@ -67,99 +67,135 @@ CARDDEFS_XML="$HSDATA_GIT/CardDefs.xml"
 REQUIREMENTS_TXT="$BASEDIR/requirements.txt"
 
 
-if [[ -z $VIRTUAL_ENV ]]; then
-	>&2 echo "Must be run from within a virtualenv"
-else
-	pip install --upgrade pip
-	pip install -r "$REQUIREMENTS_TXT" --upgrade --no-cache-dir
-fi
-
-echo "Updating repositories"
-repos=("$BASEDIR" "$HEARTHSTONEJSON_GIT" "$HSDATA_GIT" "$HSCODE_GIT")
-
-if [[ ! -d "$HEARTHSTONEJSON_GIT" ]]; then
-	git clone git@github.com:HearthSim/HearthstoneJSON.git "$HEARTHSTONEJSON_GIT"
-fi
-
-if [[ ! -d "$HSDATA_GIT" ]]; then
-	git clone git@github.com:HearthSim/hsdata.git "$HSDATA_GIT"
-fi
-
-if [[ ! -d "$HSCODE_GIT" ]]; then
-	git clone git@github.com:HearthSim/hscode.git "$HSCODE_GIT"
-fi
-
-for repo in $repos; do
-	git -C "$repo" pull
-done
-
-if ! grep -q "$BUILD" "$COMMIT_BIN"; then
-	>&2 echo "$BUILD is not present in $COMMIT_BIN. Aborting."
-	exit 3
-fi
-
-
-echo "Preparing patch directories"
-if [[ -d $HSBUILDDIR ]]; then
-	echo "$HSBUILDDIR already exists... skipping download checks."
-else
-	if ! [[ -d "$NGDP_OUT" ]]; then
-		>&2 echo "No "$NGDP_OUT" directory. Run cd $HSBDIR && $BLTE_BIN"
-		exit 2
+function upgrade_venv() {
+	if [[ -z $VIRTUAL_ENV ]]; then
+		>&2 echo "Must be run from within a virtualenv"
+	else
+		pip install --upgrade pip
+		pip install -r "$REQUIREMENTS_TXT" --upgrade --no-cache-dir
 	fi
-	echo "Moving $NGDP_OUT to $HSBUILDDIR"
-	mv "$NGDP_OUT" "$HSBUILDDIR"
-fi
-
-echo "Linking build files"
-if [[ -e $EXTRACTED_BUILD_DIR ]]; then
-	echo "$EXTRACTED_BUILD_DIR already exists, not overwriting."
-else
-	echo "Creating symlink to build in $EXTRACTED_BUILD_DIR"
-	ln -s -v "$HSBUILDDIR" "$EXTRACTED_BUILD_DIR"
-fi
+}
 
 
-# Panic? cardxml_raw_extract.py can extract the raw carddefs
-# Coupled with a manual process_cardxml.py --raw, can gen CardDefs.xml
+function update_repositories() {
+	echo "Updating repositories"
+	repos=("$BASEDIR" "$HEARTHSTONEJSON_GIT" "$HSDATA_GIT" "$HSCODE_GIT")
+
+	if [[ ! -d "$HEARTHSTONEJSON_GIT" ]]; then
+		git clone git@github.com:HearthSim/HearthstoneJSON.git "$HEARTHSTONEJSON_GIT"
+	fi
+
+	if [[ ! -d "$HSDATA_GIT" ]]; then
+		git clone git@github.com:HearthSim/hsdata.git "$HSDATA_GIT"
+	fi
+
+	if [[ ! -d "$HSCODE_GIT" ]]; then
+		git clone git@github.com:HearthSim/hscode.git "$HSCODE_GIT"
+	fi
+
+	for repo in $repos; do
+		git -C "$repo" pull
+	done
+}
 
 
-if ! git -C "$HSDATA_GIT" rev-parse "$BUILD" &>/dev/null; then
-	echo "Extracting and decompiling the build"
-
-	make --directory="$BASEDIR" -B \
-		"$EXTRACTED_BUILD_DIR/" \
-		"$EXTRACTED_BUILD_DIR/Hearthstone_Data/Managed/Assembly-CSharp.dll" \
-		"$EXTRACTED_BUILD_DIR/Hearthstone_Data/Managed/Assembly-CSharp-firstpass.dll"
-
-	echo "Generating git repositories"
-	"$COMMIT_BIN" "$BUILD"
-
-	echo "Pushing to GitHub"
-	git -C "$HSDATA_GIT" push --follow-tags -f
-	git -C "$HSCODE_GIT" push --follow-tags -f
-else
-	echo "Tag $BUILD already present in $HSDATA_GIT - skipping core build generation."
-fi
-
-git -C "$HSDATA_GIT" show "$BUILD:CardDefs.xml" > /tmp/new.xml
-git -C "$HSDATA_GIT" show "$BUILD~:CardDefs.xml" > /tmp/old.xml
-
-echo "Generating smartdiff"
-"$SMARTDIFF_BIN" "/tmp/old.xml" "/tmp/new.xml" > "$SMARTDIFF_OUT"
-echo "Generated smartdiff in $SMARTDIFF_OUT"
-rm /tmp/new.xml /tmp/old.xml
+function check_commit_sh() {
+	if ! grep -q "$BUILD" "$COMMIT_BIN"; then
+		>&2 echo "$BUILD is not present in $COMMIT_BIN. Aborting."
+		exit 3
+	fi
+}
 
 
-echo "Updating HearthstoneJSON"
-if [[ -e $HSJSONDIR ]]; then
-	echo "HearthstoneJSON is up-to-date."
-else
-	"$HEARTHSTONEJSON_BIN" "$BUILD"
-fi
+function prepare_patch_directories() {
+	echo "Preparing patch directories"
+	if [[ -d $HSBUILDDIR ]]; then
+		echo "$HSBUILDDIR already exists... skipping download checks."
+	else
+		if ! [[ -d "$NGDP_OUT" ]]; then
+			>&2 echo "No "$NGDP_OUT" directory. Run cd $HSBDIR && $BLTE_BIN"
+			exit 2
+		fi
+		echo "Moving $NGDP_OUT to $HSBUILDDIR"
+		mv "$NGDP_OUT" "$HSBUILDDIR"
+	fi
+}
 
 
-echo "Extracting card textures"
-"$TEXTUREGEN_BIN" "$HSBUILDDIR/Data/Win/"{card,shared}*.unity3d --outdir="$CARDARTDIR" --skip-existing
+function link_build_files() {
+	echo "Linking build files"
+	if [[ -e $EXTRACTED_BUILD_DIR ]]; then
+		echo "$EXTRACTED_BUILD_DIR already exists, not overwriting."
+	else
+		echo "Creating symlink to build in $EXTRACTED_BUILD_DIR"
+		ln -s -v "$HSBUILDDIR" "$EXTRACTED_BUILD_DIR"
+	fi
+}
 
-echo "Build $BUILD completed"
+
+function extract_and_decompile() {
+	# Panic? cardxml_raw_extract.py can extract the raw carddefs
+	# Coupled with a manual process_cardxml.py --raw, can gen CardDefs.xml
+
+	if ! git -C "$HSDATA_GIT" rev-parse "$BUILD" &>/dev/null; then
+		echo "Extracting and decompiling the build"
+
+		make --directory="$BASEDIR" -B \
+			"$EXTRACTED_BUILD_DIR/" \
+			"$EXTRACTED_BUILD_DIR/Hearthstone_Data/Managed/Assembly-CSharp.dll" \
+			"$EXTRACTED_BUILD_DIR/Hearthstone_Data/Managed/Assembly-CSharp-firstpass.dll"
+
+		echo "Generating git repositories"
+		"$COMMIT_BIN" "$BUILD"
+
+		echo "Pushing to GitHub"
+		git -C "$HSDATA_GIT" push --follow-tags -f
+		git -C "$HSCODE_GIT" push --follow-tags -f
+	else
+		echo "Tag $BUILD already present in $HSDATA_GIT - skipping core build generation."
+	fi
+}
+
+
+function generate_smartdiff() {
+	git -C "$HSDATA_GIT" show "$BUILD:CardDefs.xml" > /tmp/new.xml
+	git -C "$HSDATA_GIT" show "$BUILD~:CardDefs.xml" > /tmp/old.xml
+
+	echo "Generating smartdiff"
+	"$SMARTDIFF_BIN" "/tmp/old.xml" "/tmp/new.xml" > "$SMARTDIFF_OUT"
+	echo "Generated smartdiff in $SMARTDIFF_OUT"
+	rm /tmp/new.xml /tmp/old.xml
+}
+
+
+function update_hearthstonejson() {
+	echo "Updating HearthstoneJSON"
+	if [[ -e $HSJSONDIR ]]; then
+		echo "HearthstoneJSON is up-to-date."
+	else
+		"$HEARTHSTONEJSON_BIN" "$BUILD"
+	fi
+}
+
+
+function extract_card_textures() {
+	echo "Extracting card textures"
+	"$TEXTUREGEN_BIN" "$HSBUILDDIR/Data/Win/"{card,shared}*.unity3d --outdir="$CARDARTDIR" --skip-existing
+}
+
+
+function main() {
+	upgrade_venv
+	update_repositories
+	check_commit_sh
+	prepare_patch_directories
+	link_build_files
+	extract_and_decompile
+	generate_smartdiff
+	update_hearthstonejson
+
+	echo "Build $BUILD completed"
+}
+
+
+main "$@"
