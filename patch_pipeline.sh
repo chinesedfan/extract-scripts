@@ -50,6 +50,9 @@ COMMIT_BIN="$BASEDIR/commit.sh"
 # Card texture extraction/generation script
 TEXTUREGEN_BIN="$HEARTHSTONEJSON_GIT/generate_card_textures.py"
 
+# Card texture generate script
+TEXTURESYNC_BIN="$HEARTHSTONEJSON_GIT/generate.sh"
+
 # Smartdiff generation script
 SMARTDIFF_BIN="$BASEDIR/smartdiff_cardxml.py"
 
@@ -181,6 +184,7 @@ function update_hearthstonejson() {
 function extract_card_textures() {
 	echo "Extracting card textures"
 	"$TEXTUREGEN_BIN" "$HSBUILDDIR/Data/Win/"{card,shared}*.unity3d --outdir="$CARDARTDIR" --skip-existing
+	"$TEXTURESYNC_BIN" sync-textures "$CARDARTDIR"
 }
 
 
@@ -192,6 +196,7 @@ function main() {
 	link_build_files
 	extract_and_decompile
 	generate_smartdiff
+	extract_card_textures
 	update_hearthstonejson
 
 	echo "Build $BUILD completed"
