@@ -126,7 +126,7 @@ def set_locstring(entity, tag, locstring):
 	for loc in keys:
 		text = locstring[loc]
 		lt = ElementTree.Element(loc)
-		lt.text = text
+		lt.text = text.replace("\\n", "\n")
 		e.append(lt)
 	entity.append(e)
 
