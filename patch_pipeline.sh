@@ -113,24 +113,19 @@ function check_commit_sh() {
 
 function prepare_patch_directories() {
 	echo "Preparing patch directories"
-	if [[ -d $HSBUILDDIR ]]; then
-		echo "$HSBUILDDIR already exists... skipping download checks."
-	else
-		if ! [[ -d "$NGDP_OUT" ]]; then
-			>&2 echo "No "$NGDP_OUT" directory. Run cd $HSBDIR && $BLTE_BIN"
-			exit 2
-		fi
-		echo "Moving $NGDP_OUT to $HSBUILDDIR"
-		mv "$NGDP_OUT" "$HSBUILDDIR"
-	fi
-}
-
-
-function link_build_files() {
-	echo "Linking build files"
 	if [[ -e $EXTRACTED_BUILD_DIR ]]; then
 		echo "$EXTRACTED_BUILD_DIR already exists, not overwriting."
 	else
+		if [[ -d $HSBUILDDIR ]]; then
+			echo "$HSBUILDDIR already exists... skipping download checks."
+		else
+			if ! [[ -d "$NGDP_OUT" ]]; then
+				>&2 echo "No "$NGDP_OUT" directory. Run cd $HSBDIR && $BLTE_BIN"
+				exit 2
+			fi
+			echo "Moving $NGDP_OUT to $HSBUILDDIR"
+			mv "$NGDP_OUT" "$HSBUILDDIR"
+		fi
 		echo "Creating symlink to build in $EXTRACTED_BUILD_DIR"
 		ln -s -v "$HSBUILDDIR" "$EXTRACTED_BUILD_DIR"
 	fi
@@ -194,7 +189,6 @@ function main() {
 	update_repositories
 	check_commit_sh
 	prepare_patch_directories
-	link_build_files
 	extract_and_decompile
 	generate_smartdiff
 	extract_card_textures
