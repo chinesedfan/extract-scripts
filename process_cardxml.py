@@ -113,7 +113,12 @@ def set_locstring(entity, tag, locstring):
 	e = ElementTree.Element("Tag")
 	e.attrib["enumID"] = str(int(tag))
 	e.attrib["type"] = "LocString"
-	for loc, text in locstring.items():
+	keys = sorted(locstring.keys())
+	if "enUS" in keys:
+		keys.insert(0, keys.pop(keys.index("enUS")))
+
+	for loc in keys:
+		text = locstring[loc]
 		lt = ElementTree.Element(loc)
 		lt.text = text
 		e.append(lt)
