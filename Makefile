@@ -10,7 +10,6 @@ PROTOS_DIR := $(BUILD_DIR)/protos
 PROTOS_GO_DIR := $(BUILD_DIR)/go-protos
 DECOMPILER_BIN := mono $(BASE_DIR)/decompiler/build/decompile.exe
 EXTRACT_MPQ_BIN := $(BASE_DIR)/extract_mpq.py
-PROCESS_CARDXML_BIN := $(BASE_DIR)/process_cardxml.py
 PROTO_EXTRACTOR_BIN := $(BASE_DIR)/../proto-extractor/bin/Debug/proto-extractor.exe
 
 .SUFFIXES:
@@ -54,9 +53,8 @@ $(EXTRACTED_DIR)/%/:
 	$(eval DBF := $(shell find -L $@ -name DBF -type d))
 	@mkdir -p $(outdir)
 	@if [ -z "$(DBF)" ]; then \
-		$(PROCESS_CARDXML_BIN) -o $(outdir)/CardDefs.xml $(bundles); \
+		@echo "Nothing to do"; \
 	else \
-		$(PROCESS_CARDXML_BIN) -o $(outdir)/CardDefs.xml --dbf-dir $(DBF) $(bundles); \
 		cp -rf $@/DBF $(outdir); \
 	fi
 	@cp -rf $@/Strings $(outdir)

@@ -17,6 +17,9 @@ DATADIR="/mnt/home/ngdp"
 # Base build directory from extract-scripts
 BUILDDIR="$BASEDIR/build"
 
+# Directory where processed CardDefs.xml go
+PROCESSED_DIR="$BUILDDIR/processed/$BUILD"
+
 # Directory storing the 'hsb' blte config
 HSBDIR="$DATADIR/hsb"
 
@@ -46,6 +49,9 @@ BLTE_BIN="$HOME/bin/blte.exe"
 
 # Autocommit script
 COMMIT_BIN="$BASEDIR/commit.sh"
+
+# CardDefs.xml processing
+PROCESS_CARDXML_BIN="$BASEDIR/process_cardxml.py"
 
 # Card texture extraction/generation script
 TEXTUREGEN_BIN="$HEARTHSTONEJSON_GIT/generate_card_textures.py"
@@ -113,6 +119,7 @@ function check_commit_sh() {
 
 function prepare_patch_directories() {
 	echo "Preparing patch directories"
+
 	if [[ -e $HSBUILDDIR ]]; then
 		echo "$HSBUILDDIR already exists, not overwriting."
 	else
@@ -136,11 +143,17 @@ function extract_and_decompile() {
 	# Panic? cardxml_raw_extract.py can extract the raw carddefs
 	# Coupled with a manual process_cardxml.py --raw, can gen CardDefs.xml
 
+	mkdir -p "$PROCESSED_DIR"
+
 	if ! git -C "$HSDATA_GIT" rev-parse "$BUILD" &>/dev/null; then
 		echo "Extracting and decompiling the build"
 
+		"$PROCESS_CARDXML_BIN" \
+			--dbf-dir="$HSBUILDDIR/DBF" \
+			-o "$PROCESSED_DIR/CardDefs.xml" \
+			"$HSBUILDDIR/Data/Win"/card*.unity3d
+
 		make --directory="$BASEDIR" -B \
-			"$HSBUILDDIR/" \
 			"$HSBUILDDIR/Hearthstone_Data/Managed/Assembly-CSharp.dll" \
 			"$HSBUILDDIR/Hearthstone_Data/Managed/Assembly-CSharp-firstpass.dll"
 
