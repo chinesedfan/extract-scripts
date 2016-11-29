@@ -30,7 +30,7 @@ HSBUILDDIR="$DATADIR/data/ngdp/hsb/$BUILD"
 CARDARTDIR="$BUILDDIR/card-art"
 
 # HearthstoneJSON git repository
-HEARTHSTONEJSON_GIT="$HOME/projects/HearthstoneJSON"
+HEARTHSTONEJSON_GIT="$BUILDDIR/HearthstoneJSON"
 
 # HearthstoneJSON file generator
 HEARTHSTONEJSON_BIN="$HEARTHSTONEJSON_GIT/generate.sh"
