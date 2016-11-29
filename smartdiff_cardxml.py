@@ -64,7 +64,9 @@ def get_tags(cards):
 def print_enum_diff(key, before, after):
 	if before is None:
 		print("  - ADDED %s = %r" % (key, after))
-	elif after is None and before != 0:
+	elif after is None:
+		if not before or not after:
+			return
 		print("  - DELETED %s (was: %r)" % (key, before))
 	else:
 		print("  - CHANGED %s: %r -> %r" % (key, before, after))
