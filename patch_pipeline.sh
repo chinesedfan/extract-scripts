@@ -73,6 +73,7 @@ REQUIREMENTS_TXT="$BASEDIR/requirements.txt"
 function upgrade_venv() {
 	if [[ -z $VIRTUAL_ENV ]]; then
 		>&2 echo "Must be run from within a virtualenv"
+		exit 1
 	else
 		pip install --upgrade pip
 		pip install -r "$REQUIREMENTS_TXT" --upgrade --no-cache-dir
