@@ -445,7 +445,8 @@ def main():
 
 		if id in extra_tags:
 			for tag, value, isref, ispower in extra_tags[id]:
-				set_tag(entity, tag, value)
+				if value:
+					set_tag(entity, tag, value)
 
 		els = extra_locstrings.get(id)
 		if els:
