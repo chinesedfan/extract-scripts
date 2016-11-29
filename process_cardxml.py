@@ -257,7 +257,10 @@ def merge_locale_assets(data):
 
 
 def detect_build(path):
-	return int([x for x in path.split(os.path.sep) if x.isdigit()][0])
+	path_fragments = [x for x in path.split(os.path.sep) if x.isdigit()]
+	if not path_fragments:
+		return
+	return int(path_fragments[0])
 
 
 def guess_overload(text):
@@ -322,6 +325,9 @@ def main():
 	args = p.parse_args(sys.argv[1:])
 
 	build = args.build or detect_build(args.files[0].name)
+	if build is None:
+		sys.stderr.write("Could not detect build. Use --build.")
+		exit(1)
 
 	if args.raw:
 		carddefs = {}
