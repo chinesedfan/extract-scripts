@@ -87,7 +87,7 @@ function _init-repo() {
 	PROJECT="$1"
 	REPO="$BASEDIR/$PROJECT.git"
 	GIT="git -C $REPO"
-	README="$BASEDIR/README-$PROJECT.md"
+	README="$BASEDIR/res/README-$PROJECT.md"
 
 	# Initial commit date
 	export GIT_AUTHOR_DATE="2013-03-22 12:00:00 +0000"
