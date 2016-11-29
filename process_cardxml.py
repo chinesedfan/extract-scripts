@@ -125,7 +125,7 @@ def process_dbf(dbf, xml):
 		if long_guid:
 			guids[long_guid] = mini_guid
 
-		hero_power_id = record["HERO_POWER_ID"]
+		hero_power_id = record.get("HERO_POWER_ID")
 		if hero_power_id:
 			hero_powers[mini_guid] = hero_power_id
 
