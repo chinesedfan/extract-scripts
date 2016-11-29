@@ -24,7 +24,7 @@ HSBDIR="$DATADIR/hsb"
 NGDP_OUT="$HSBDIR/out"
 
 # Directory storing the build data files
-HSBUILDDIR="$DATADIR/data/ngdp/hsb/$BUILD"
+HS_RAW_BUILDDIR="$DATADIR/data/ngdp/hsb/$BUILD"
 
 # Directory that contains card textures
 CARDARTDIR="$BUILDDIR/card-art"
@@ -39,7 +39,7 @@ HEARTHSTONEJSON_BIN="$HEARTHSTONEJSON_GIT/generate.sh"
 HSJSONDIR="$HOME/projects/HearthstoneJSON/build/html/v1/$BUILD"
 
 # Symlink file for extracted data
-EXTRACTED_BUILD_DIR="$BUILDDIR/extracted/$BUILD"
+HSBUILDDIR="$BUILDDIR/extracted/$BUILD"
 
 # Patch downloader
 BLTE_BIN="$HOME/bin/blte.exe"
@@ -113,21 +113,21 @@ function check_commit_sh() {
 
 function prepare_patch_directories() {
 	echo "Preparing patch directories"
-	if [[ -e $EXTRACTED_BUILD_DIR ]]; then
-		echo "$EXTRACTED_BUILD_DIR already exists, not overwriting."
+	if [[ -e $HSBUILDDIR ]]; then
+		echo "$HSBUILDDIR already exists, not overwriting."
 	else
-		if [[ -d $HSBUILDDIR ]]; then
-			echo "$HSBUILDDIR already exists... skipping download checks."
+		if [[ -d $HS_RAW_BUILDDIR ]]; then
+			echo "$HS_RAW_BUILDDIR already exists... skipping download checks."
 		else
 			if ! [[ -d "$NGDP_OUT" ]]; then
 				>&2 echo "No "$NGDP_OUT" directory. Run cd $HSBDIR && $BLTE_BIN"
 				exit 2
 			fi
-			echo "Moving $NGDP_OUT to $HSBUILDDIR"
-			mv "$NGDP_OUT" "$HSBUILDDIR"
+			echo "Moving $NGDP_OUT to $HS_RAW_BUILDDIR"
+			mv "$NGDP_OUT" "$HS_RAW_BUILDDIR"
 		fi
-		echo "Creating symlink to build in $EXTRACTED_BUILD_DIR"
-		ln -s -v "$HSBUILDDIR" "$EXTRACTED_BUILD_DIR"
+		echo "Creating symlink to build in $HSBUILDDIR"
+		ln -s -v "$HS_RAW_BUILDDIR" "$HSBUILDDIR"
 	fi
 }
 
@@ -140,9 +140,9 @@ function extract_and_decompile() {
 		echo "Extracting and decompiling the build"
 
 		make --directory="$BASEDIR" -B \
-			"$EXTRACTED_BUILD_DIR/" \
-			"$EXTRACTED_BUILD_DIR/Hearthstone_Data/Managed/Assembly-CSharp.dll" \
-			"$EXTRACTED_BUILD_DIR/Hearthstone_Data/Managed/Assembly-CSharp-firstpass.dll"
+			"$HSBUILDDIR/" \
+			"$HSBUILDDIR/Hearthstone_Data/Managed/Assembly-CSharp.dll" \
+			"$HSBUILDDIR/Hearthstone_Data/Managed/Assembly-CSharp-firstpass.dll"
 
 		echo "Generating git repositories"
 		"$COMMIT_BIN" "$BUILD"
