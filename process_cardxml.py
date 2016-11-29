@@ -109,13 +109,23 @@ def set_tag(entity, tag, value, type=None):
 	entity.append(e)
 
 
-def process_dbf(dbf, xml):
-	print_info("Processing DBF %r" % (dbf))
-	dbf = Dbf.load(dbf)
+def set_locstring(entity, tag, locstring):
+	e = ElementTree.Element("Tag")
+	e.attrib["enumID"] = str(int(tag))
+	e.attrib["type"] = "LocString"
+	for loc, text in locstring.items():
+		lt = ElementTree.Element(loc)
+		lt.text = text
+		e.append(lt)
+	entity.append(e)
 
+
+def process_dbf(dbf, xml):
 	db = {}
 	guids = {}
 	hero_powers = {}
+	extra_locstrings = {}
+	apply_locstrings = "NAME" in dbf.columns
 
 	for record in dbf.records:
 		id = record["ID"]
@@ -130,6 +140,17 @@ def process_dbf(dbf, xml):
 		if hero_power_id:
 			hero_powers[mini_guid] = hero_power_id
 
+		if apply_locstrings:
+			extra_locstrings[mini_guid] = {
+				GameTag.CARDNAME: record.get("NAME"),
+				GameTag.CARDTEXT_INHAND: record.get("TEXT_IN_HAND"),
+				GameTag.FLAVORTEXT: record.get("FLAVOR_TEXT"),
+				GameTag.HOW_TO_EARN: record.get("HOW_TO_GET_CARD"),
+				GameTag.HOW_TO_EARN_GOLDEN: record.get("HOW_TO_GET_GOLD_CARD"),
+				GameTag.TARGETING_ARROW_TEXT: record.get("TARGET_ARROW_TEXT"),
+				GameTag.ARTISTNAME: record.get("ARTIST_NAME"),
+			}
+
 	clean_entourage_ids(xml, guids)
 
 	# Replace numeric id by card id
@@ -141,7 +162,7 @@ def process_dbf(dbf, xml):
 		assert k not in hero_powers
 		hero_powers[k] = v
 
-	return hero_powers, {v: k for k, v in db.items()}, db
+	return hero_powers, {v: k for k, v in db.items()}, db, extra_locstrings
 
 
 def clean_entourage_ids(xml, guids):
@@ -235,7 +256,7 @@ def _prepare_strings(xml, locale):
 		tag.attrib["type"] = "LocString"
 
 
-def merge_locale_assets(data):
+def merge_locale_assets(data, card_dbf=None):
 	print_info("Performing locale merge")
 	entities = {}
 
@@ -363,10 +384,12 @@ def main():
 	else:
 		xml = merge_card_assets(entities, build)
 
-	hero_powers, dbf_ids, ids_dbf, extra_tags = {}, {}, {}, {}
+	hero_powers, dbf_ids, ids_dbf, extra_tags, extra_locstrings = {}, {}, {}, {}, {}
 	if args.dbf_dir:
 		card_xml = os.path.join(args.dbf_dir, "CARD.xml")
-		hero_powers, dbf_ids, ids_dbf = process_dbf(card_xml, xml)
+		print_info("Processing DBF %r" % (card_xml))
+		card_dbf = Dbf.load(card_xml)
+		hero_powers, dbf_ids, ids_dbf, extra_locstrings = process_dbf(card_dbf, xml)
 
 		card_tag = os.path.join(args.dbf_dir, "CARD_TAG.xml")
 		if os.path.exists(card_tag):
@@ -423,6 +446,16 @@ def main():
 		if id in extra_tags:
 			for tag, value, isref, ispower in extra_tags[id]:
 				set_tag(entity, tag, value)
+
+		els = extra_locstrings.get(id)
+		if els:
+			for tag, value in els.items():
+				if not value:
+					continue
+				if tag == GameTag.ARTISTNAME:
+					set_tag(entity, tag, value, type="String")
+				else:
+					set_locstring(entity, tag, value)
 
 	xml.attrib["build"] = str(build)
 
