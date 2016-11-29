@@ -281,7 +281,7 @@ def reverse_texture_path(path):
 
 
 def parse_bundles(files):
-	carddefs, entities, textures = {}, {}, {}
+	carddefs, entities, = {}, {}
 	whitelist = [
 		"cards.unity3d",
 		"cards0.unity3d",
@@ -308,32 +308,8 @@ def parse_bundles(files):
 					entities[d.name] = ElementTree.fromstring(d.script)
 				else:
 					raise Exception("Bad TextAsset %r" % (d))
-			elif obj.type in ("CardDef", "MonoScript"):
-				d = obj.read()
-				if "m_GameObject" not in d:
-					# We check for MonoScript because type checks through asset
-					# references does not return the real class name yet.
-					# This means we have to check for GameObject in the obj to
-					# make sure it's actually a card.
-					continue
-				if d["m_GameObject"] is None:
-					print_warn("Missing m_GameObject for %r" % (obj))
-					continue
-				cardid = d["m_GameObject"].resolve().name
-				if "m_PortraitTexture" in d:
-					ptr = d["m_PortraitTexture"]
-					if not ptr:
-						continue
-					try:
-						texture = ptr.resolve().name
-					except NotImplementedError:
-						texture = ""
-				else:
-					texture = reverse_texture_path(d.get("m_PortraitTexturePath", ""))
-				if texture:
-					textures[cardid] = texture
 
-	return carddefs, entities, textures
+	return carddefs, entities
 
 
 def main():
@@ -352,9 +328,9 @@ def main():
 		for f in args.files:
 			name = os.path.splitext(os.path.basename(f.name))[0]
 			carddefs[name] = ElementTree.fromstring(f.read())
-			entities, textures = {}, {}
+			entities = {}
 	else:
-		carddefs, entities, textures = parse_bundles(args.files)
+		carddefs, entities = parse_bundles(args.files)
 
 	if carddefs:
 		xml = merge_locale_assets(carddefs)
@@ -408,11 +384,6 @@ def main():
 
 		if SPARE_PART_RE.match(id):
 			set_tag(entity, GameTag.SPARE_PART, 1, type="Bool")
-
-		if id in textures:
-			e = ElementTree.Element("Texture")
-			e.text = textures[id]
-			entity.append(e)
 
 		if id in hero_powers:
 			e = ElementTree.Element("HeroPower")
