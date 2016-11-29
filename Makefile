@@ -51,12 +51,12 @@ $(EXTRACTED_DIR)/%/:
 	$(eval buildnum := $(notdir $(patsubst %/,%,$@)))
 	$(eval outdir := $(PROCESSED_DIR)/$(buildnum))
 	$(eval bundles := $(shell find -L $@/Data -name '*.unity3d' -type f))
-	$(eval DBF := $(shell find -L $@ -name CARD.xml -type f))
+	$(eval DBF := $(shell find -L $@ -name DBF -type d))
 	@mkdir -p $(outdir)
 	@if [ -z "$(DBF)" ]; then \
 		$(PROCESS_CARDXML_BIN) -o $(outdir)/CardDefs.xml $(bundles); \
 	else \
-		$(PROCESS_CARDXML_BIN) -o $(outdir)/CardDefs.xml --dbf $(DBF) $(bundles); \
+		$(PROCESS_CARDXML_BIN) -o $(outdir)/CardDefs.xml --dbf-dir $(DBF) $(bundles); \
 		cp -rf $@/DBF $(outdir); \
 	fi
 	@cp -rf $@/Strings $(outdir)

@@ -100,11 +100,12 @@ def clean_entity(xml):
 	return xml
 
 
-def set_tag(entity, tag, value, type):
+def set_tag(entity, tag, value, type=None):
 	e = ElementTree.Element("Tag")
 	e.attrib["enumID"] = str(int(tag))
 	e.attrib["value"] = str(value)
-	e.attrib["type"] = type
+	if type is not None:
+		e.attrib["type"] = type
 	entity.append(e)
 
 
@@ -140,7 +141,7 @@ def process_dbf(dbf, xml):
 		assert k not in hero_powers
 		hero_powers[k] = v
 
-	return hero_powers, {v: k for k, v in db.items()}
+	return hero_powers, {v: k for k, v in db.items()}, db
 
 
 def clean_entourage_ids(xml, guids):
@@ -315,11 +316,30 @@ def parse_bundles(files):
 	return carddefs, entities
 
 
+def process_card_tag_dbf(card_tag, dbf_ids):
+	extra_tags = {}
+	print_info("Processing CARD_TAG DBF %r" % (card_tag))
+	dbf = Dbf.load(card_tag)
+
+	for record in dbf.records:
+		dbf_id = record["CARD_ID"]
+		card_id = dbf_ids[dbf_id]
+		tag = record["TAG_ID"]
+		value = record["TAG_VALUE"]
+		isref = record["IS_REFERENCE_TAG"]
+		ispower = record["IS_POWER_KEYWORD_TAG"]
+		if card_id not in extra_tags:
+			extra_tags[card_id] = []
+		extra_tags[card_id].append((tag, value, isref, ispower))
+
+	return extra_tags
+
+
 def main():
 	p = ArgumentParser()
 	p.add_argument("files", nargs="+", type=FileType("rb"))
 	p.add_argument("-o", "--outfile", nargs="?", type=FileType("wb"))
-	p.add_argument("--dbf", nargs="?", type=str)
+	p.add_argument("--dbf-dir", nargs="?", type=str)
 	p.add_argument("--build", type=int, default=None)
 	p.add_argument("--raw", action="store_true")
 	args = p.parse_args(sys.argv[1:])
@@ -343,10 +363,14 @@ def main():
 	else:
 		xml = merge_card_assets(entities, build)
 
-	if args.dbf:
-		hero_powers, dbf_ids = process_dbf(args.dbf, xml)
-	else:
-		hero_powers, dbf_ids = {}, {}
+	hero_powers, dbf_ids, ids_dbf, extra_tags = {}, {}, {}, {}
+	if args.dbf_dir:
+		card_xml = os.path.join(args.dbf_dir, "CARD.xml")
+		hero_powers, dbf_ids, ids_dbf = process_dbf(card_xml, xml)
+
+		card_tag = os.path.join(args.dbf_dir, "CARD_TAG.xml")
+		if os.path.exists(card_tag):
+			extra_tags = process_card_tag_dbf(card_tag, ids_dbf)
 
 	if build < 6024:
 		SHROUDED = "Can't be targeted by Spells or Hero Powers."
@@ -395,6 +419,10 @@ def main():
 			e = ElementTree.Element("HeroPower")
 			e.attrib["cardID"] = hero_powers[id]
 			entity.append(e)
+
+		if id in extra_tags:
+			for tag, value, isref, ispower in extra_tags[id]:
+				set_tag(entity, tag, value)
 
 	xml.attrib["build"] = str(build)
 
