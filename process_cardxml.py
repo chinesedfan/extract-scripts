@@ -103,11 +103,15 @@ def clean_entity(xml):
 def set_tag(entity, tag, value, type=None):
 	e = ElementTree.Element("Tag")
 	e.attrib["enumID"] = str(int(tag))
-	e.attrib["value"] = str(value)
 	if tag in TAGS:
 		name, type = TAGS[tag]
 	if type is not None:
 		e.attrib["type"] = type
+
+	if type == "String":
+		e.text = str(value)
+	else:
+		e.attrib["value"] = str(value)
 	entity.append(e)
 
 
