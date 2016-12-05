@@ -158,10 +158,10 @@ function process_cardxml() {
 
 	if [[ ! -z $dbf ]]; then
 		cp -rf "$dbf" -t "$PROCESSED_DIR"
-		dbfdir="--dbf-dir=$dbf"
 		"$PROCESS_CARDXML_BIN" $(find -L "$datadir" -name 'card*.unity3d' -type f) -o "$outfile" --dbf-dir="$dbf"
 	else
-		"$PROCESS_CARDXML_BIN" $(find -L "$datadir" -name 'card*.unity3d' -type f) -o "$outfile"
+		csv="$HSBUILDDIR/manifest-cards.csv"
+		"$PROCESS_CARDXML_BIN" $(find -L "$datadir" -name 'card*.unity3d' -type f) -o "$outfile" --manifest-csv="$csv"
 	fi
 	cp -rf "$HSBUILDDIR/Strings" -t "$PROCESSED_DIR"
 }

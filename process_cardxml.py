@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+
+import csv
 import os
 import re
 import sys
@@ -78,8 +80,9 @@ class CardXMLProcessor:
 		self._p = ArgumentParser()
 		self._p.add_argument("files", nargs="+", type=FileType("rb"))
 		self._p.add_argument("-o", "--outfile", nargs="?", type=FileType("wb"))
-		self._p.add_argument("--dbf-dir", nargs="?", type=str)
 		self._p.add_argument("--build", type=int, default=None)
+		self._p.add_argument("--dbf-dir", nargs="?", type=str)
+		self._p.add_argument("--manifest-csv", nargs="?", type=str)
 		self._p.add_argument("--raw", action="store_true")
 
 		# The final dict of entities
@@ -201,6 +204,19 @@ class CardXMLProcessor:
 				tag = GameTag(int(e.attrib["enumID"]))
 				self.entity_strings[id][tag][locale] = e.text
 
+	def parse_manifest_csv(self, path):
+		self.info("Processing manifest %r" % (path))
+
+		with open(path, "r") as f:
+			reader = csv.reader(f)
+			for dbf_id, card_id, unk1, unk2 in reader:
+				dbf_id = int(dbf_id)
+				self.dbf_ids[id] = card_id
+				if card_id not in self.entities:
+					self.warn("%r found in manifest but not present in card def" % (card_id))
+				else:
+					self.entities[card_id].dbf_id = dbf_id
+
 	def parse_card_dbf(self, path):
 		self.info("Processing CARD DBF %r" % (path))
 		dbf = Dbf.load(path)
@@ -280,7 +296,7 @@ class CardXMLProcessor:
 
 					if self.build < 3640 and locale != "enUS":
 						# Nothing was localized before that build
-						if text == self.entity_strings[entity.id][tag]["enUS"]:
+						if text == self.entity_strings[entity.id][tag].get("enUS", ""):
 							continue
 
 					text = text.replace("\\n", "\n").strip()
@@ -354,6 +370,9 @@ class CardXMLProcessor:
 			else:
 				self.parse_bundle(f)
 
+		if self.args.manifest_csv:
+			self.parse_manifest_csv(self.args.manifest_csv)
+
 		if self.args.dbf_dir:
 			path = os.path.join(self.args.dbf_dir, "CARD.xml")
 			if os.path.exists(path):
@@ -363,6 +382,9 @@ class CardXMLProcessor:
 			path = os.path.join(self.args.dbf_dir, "CARD_TAG.xml")
 			if os.path.exists(path):
 				self.parse_card_tag_dbf(path)
+
+		if not self.dbf_ids:
+			self.warn("No DBF database found. Specify one with --dbf-dir or --manifest-csv.")
 
 		for entity in self.entities.values():
 			self.clean_entity(entity)
