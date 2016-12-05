@@ -356,7 +356,8 @@ class CardXMLProcessor:
 
 		if self.args.dbf_dir:
 			path = os.path.join(self.args.dbf_dir, "CARD.xml")
-			self.parse_card_dbf(path)
+			if os.path.exists(path):
+				self.parse_card_dbf(path)
 
 			# Check for CARD_TAG.xml too
 			path = os.path.join(self.args.dbf_dir, "CARD_TAG.xml")

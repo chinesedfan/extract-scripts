@@ -45,7 +45,12 @@ HSJSONDIR="$HOME/projects/HearthstoneJSON/build/html/v1/$BUILD"
 HSBUILDDIR="$BUILDDIR/extracted/$BUILD"
 
 # Patch downloader
-BLTE_BIN="$HOME/bin/blte.exe"
+DOWNLOAD_BIN="$HOME/bin/ngdp-get"
+
+# ILSpy decompiler script
+DECOMPILER_BIN="mono $BASEDIR/decompiler/build/decompile.exe"
+
+DECOMPILED_DIR="$BUILDDIR/decompiled/$BUILD"
 
 # Autocommit script
 COMMIT_BIN="$BASEDIR/commit.sh"
@@ -127,7 +132,7 @@ function prepare_patch_directories() {
 			echo "$HS_RAW_BUILDDIR already exists... skipping download checks."
 		else
 			if ! [[ -d "$NGDP_OUT" ]]; then
-				>&2 echo "No "$NGDP_OUT" directory. Run cd $HSBDIR && $BLTE_BIN"
+				>&2 echo "No "$NGDP_OUT" directory. Run cd $HSBDIR && $DOWNLOAD_BIN"
 				exit 2
 			fi
 			echo "Moving $NGDP_OUT to $HS_RAW_BUILDDIR"
@@ -139,33 +144,52 @@ function prepare_patch_directories() {
 }
 
 
-function extract_and_decompile() {
+function process_cardxml() {
+	mkdir -p "$PROCESSED_DIR"
+
+	echo "Extracting and processing CardDefs.xml file"
+
 	# Panic? cardxml_raw_extract.py can extract the raw carddefs
 	# Coupled with a manual process_cardxml.py --raw, can gen CardDefs.xml
 
+	outfile="$PROCESSED_DIR/CardDefs.xml"
+	datadir="$HSBUILDDIR/Data"
+	dbf=$(find -L "$HSBUILDDIR" -name DBF -type d)
+
+	if [[ ! -z $dbf ]]; then
+		cp -rf "$dbf" -t "$PROCESSED_DIR"
+		dbfdir="--dbf-dir=$dbf"
+		"$PROCESS_CARDXML_BIN" $(find -L "$datadir" -name 'card*.unity3d' -type f) -o "$outfile" --dbf-dir="$dbf"
+	else
+		"$PROCESS_CARDXML_BIN" $(find -L "$datadir" -name 'card*.unity3d' -type f) -o "$outfile"
+	fi
+	cp -rf "$HSBUILDDIR/Strings" -t "$PROCESSED_DIR"
+}
+
+
+function decompile_code() {
 	mkdir -p "$PROCESSED_DIR"
 
+	echo "Decompiling the Assemblies"
+
+	acdll="$HSBUILDDIR/Hearthstone_Data/Managed/Assembly-CSharp.dll"
+	acfdll="$HSBUILDDIR/Hearthstone_Data/Managed/Assembly-CSharp-firstpass.dll"
+
+	"$DECOMPILER_BIN" "$acdll" "$acfdll" "$DECOMPILED_DIR"
+}
+
+
+function generate_git_repositories() {
+	echo "Generating git repositories"
 	if ! git -C "$HSDATA_GIT" rev-parse "$BUILD" &>/dev/null; then
-		echo "Extracting and decompiling the build"
-
-		"$PROCESS_CARDXML_BIN" \
-			--dbf-dir="$HSBUILDDIR/DBF" \
-			-o "$PROCESSED_DIR/CardDefs.xml" \
-			"$HSBUILDDIR/Data/Win"/card*.unity3d
-
-		make --directory="$BASEDIR" -B \
-			"$HSBUILDDIR/Hearthstone_Data/Managed/Assembly-CSharp.dll" \
-			"$HSBUILDDIR/Hearthstone_Data/Managed/Assembly-CSharp-firstpass.dll"
-
-		echo "Generating git repositories"
 		"$COMMIT_BIN" "$BUILD"
-
-		echo "Pushing to GitHub"
-		git -C "$HSDATA_GIT" push --follow-tags -f
-		git -C "$HSCODE_GIT" push --follow-tags -f
 	else
-		echo "Tag $BUILD already present in $HSDATA_GIT - skipping core build generation."
+		echo "Tag $BUILD already present in $HSDATA_GIT - Not committing."
 	fi
+
+	echo "Pushing to GitHub"
+	git -C "$HSDATA_GIT" push --follow-tags -f
+	git -C "$HSCODE_GIT" push --follow-tags -f
 }
 
 
@@ -202,7 +226,9 @@ function main() {
 	update_repositories
 	check_commit_sh
 	prepare_patch_directories
-	extract_and_decompile
+	process_cardxml
+	decompile_code
+	generate_git_repositories
 	generate_smartdiff
 	extract_card_textures
 	update_hearthstonejson
