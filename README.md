@@ -20,3 +20,5 @@ brew install stormlib
 
 pip install mpq
 pip install hearthstone
+pip install unitypack lz4
+pip install lxml
