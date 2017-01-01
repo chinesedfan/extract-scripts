@@ -6,6 +6,7 @@ import re
 import sys
 import unitypack
 from argparse import ArgumentParser, FileType
+from xml import etree as ET
 from xml.dom import minidom
 from lxml import etree as ElementTree
 from hearthstone import cardxml
@@ -24,7 +25,7 @@ SPARE_PART_RE = re.compile(r"PART_\d+")
 
 
 def pretty_xml(xml):
-	ret = ElementTree.tostring(xml, encoding="utf-8")
+	ret = ET.ElementTree.tostring(xml, encoding="utf-8")
 	ret = minidom.parseString(ret).toprettyxml(indent="\t", encoding="utf-8")
 	return b"\n".join(line for line in ret.split(b"\n") if line.strip())
 
@@ -274,7 +275,7 @@ class CardXMLProcessor:
 
 	def generate_xml(self):
 		self.info("Processing %i entities" % (len(self.entities)))
-		root = ElementTree.Element("CardDefs", build=str(self.build))
+		root = ET.ElementTree.Element("CardDefs", build=str(self.build))
 		ids = sorted(self.entities.keys(), key=str.lower)
 		for id in ids:
 			root.append(self.entities[id].to_xml())
