@@ -1,5 +1,5 @@
 
-###
+### Build
 
 make
 
@@ -9,16 +9,16 @@ make
 
 - Install StormLib
 
-brew tap homebrew/games
-brew install stormlib
+   - brew tap homebrew/games
+   - brew install stormlib
 
 - Install mpq
 
 ### Requirements
 
-* Python 3.4+
+- Python 3.4+
 
-pip install mpq
-pip install hearthstone
-pip install unitypack lz4
-pip install lxml
+   - pip install mpq
+   - pip install hearthstone
+   - pip install unitypack lz4
+   - pip install lxml
